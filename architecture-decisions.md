@@ -12,6 +12,8 @@
 - Server never sees plaintext secrets; encryption and decryption are browser-only.
 - Personal secrets are cryptographically bound to the owner and are not accessible by role escalation.
 - Audit logging for all read/write operations on secrets and role changes.
+- Crypto primitives: PBKDF2-HMAC-SHA-256, HKDF-SHA-256, AES-256-GCM, ECDH P-256 for key wrapping.
+- Secrets use envelope encryption with per-item data keys and scope-specific wrapping keys.
 
 ## Admin Access
 - Django admin is hidden behind per-request random URL tokens.

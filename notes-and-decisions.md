@@ -21,3 +21,15 @@
 - Pinned backend dependencies to latest versions on 2026-02-09 in `backend/requirements.txt`.
 - `python -m venv .venv` succeeded, but `ensurepip` failed due to temp folder permission errors.
 - Rechecked package versions on 2026-02-09; Gunicorn pinned to `25.0.3`.
+
+## Cryptography Design (Step 2)
+- Client-side only: all encryption and decryption happens in the browser via WebCrypto.
+- Password KDF: PBKDF2-HMAC-SHA-256 with per-user random salt and high iteration count stored server-side.
+- Master key derivation: PBKDF2 output -> root key; subkeys derived with HKDF-SHA-256 for separation.
+- Data encryption: AES-256-GCM with per-item random 96-bit nonce.
+- Envelope encryption: each secret uses a random 256-bit data key; data key is wrapped by key-encryption keys.
+- Key-encryption keys: derived from user root key for personal secrets; org/dept secrets have scope keys.
+- Multi-recipient sharing: data key wrapped per authorized recipient using ECDH (P-256) + AES-GCM.
+- Integrity: AES-GCM provides confidentiality and integrity; tampering yields authentication failure.
+- Key rotation: rotate scope keys periodically; rewrap data keys without re-encrypting ciphertext.
+- Recovery: optional recovery key pair stored client-side; server stores only wrapped data keys.

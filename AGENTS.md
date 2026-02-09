@@ -4,7 +4,7 @@
 
 **Started:**   
 **Location:** d:\password\new-manager 
-**Status:** Step 1 complete
+**Status:** Step 2 complete
 
 ## Session History
 
@@ -32,14 +32,19 @@
 **Current Step:** 1/9  
 **Final Action:** Verified latest stable versions on PyPI; pinned Gunicorn to 25.0.3.  
 
+### Session 5: 
+**Status:** Step 2 completed  
+**Current Step:** 2/9  
+**Final Action:** Documented cryptography design and primitives.  
+
 
 ---
 
 ## Progress Tracker
 
-- [ ] Step 0: set up project structure and dependencies 
+- [x] Step 0: set up project structure and dependencies 
 - [x] Step 1: Threat model + security goals 
-- [ ] Step 2: Cryptography design 
+- [x] Step 2: Cryptography design 
 - [ ] Step 3: Data model (Django/Postgres) 
 - [ ] Step 4: Authorization + policy engine 
 - [ ] Step 5: API design 
@@ -71,10 +76,10 @@
 
 ## Current State
 
-**Virtual Environment:** 
-**Django Project:** 
-**Database:** 
-**Dependencies:** 
+**Virtual Environment:** `.venv` (pip bootstrap failed due to temp permission error)
+**Django Project:** Initialized (Core apps: `vault`, `app`)
+**Database:** SQLite for development, PostgreSQL-ready
+**Dependencies:** Pinned to latest stable versions in `backend/requirements.txt`
 
 ## rules
 1. Always use the latest version of Django and Django REST Framework
@@ -106,3 +111,4 @@
 - Backend requirements pinned; venv created with pip bootstrap issue noted in `notes-and-decisions.md`.
 - Requirements rechecked; Gunicorn updated to latest stable version.
 - Latest stable versions verified via PyPI; Gunicorn pinned to `25.0.3`.
+- Step 2 cryptography design documented in `notes-and-decisions.md`.

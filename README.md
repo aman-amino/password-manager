@@ -10,6 +10,13 @@ Dependencies are pinned to latest stable versions (checked 2026-02-09) in `backe
 - Audit logging for all secret operations and role changes.
 - Hidden Django admin URL minted on demand by superadmin.
 
+## Cryptography Summary
+- PBKDF2-HMAC-SHA-256 for password-based key derivation with per-user salt.
+- HKDF-SHA-256 for subkey separation.
+- AES-256-GCM for secret encryption with per-item random nonce.
+- Envelope encryption with per-item data keys.
+- ECDH P-256 + AES-GCM for per-recipient data key wrapping.
+
 ## Threat Model (Summary)
 - Assets: encrypted secrets, client master keys, org metadata, audit logs.
 - Trust boundaries: browser vs backend API vs database.

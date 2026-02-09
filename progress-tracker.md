@@ -2,7 +2,7 @@
 
 - [ ] Step 0: Restate scope + assumptions
 - [x] Step 1: Threat model + security goals
-- [ ] Step 2: Cryptography design
+- [x] Step 2: Cryptography design
 - [ ] Step 3: Data model (Django/Postgres)
 - [ ] Step 4: Authorization + policy engine
 - [ ] Step 5: API design
