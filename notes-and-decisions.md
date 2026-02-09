@@ -33,3 +33,16 @@
 - Integrity: AES-GCM provides confidentiality and integrity; tampering yields authentication failure.
 - Key rotation: rotate scope keys periodically; rewrap data keys without re-encrypting ciphertext.
 - Recovery: optional recovery key pair stored client-side; server stores only wrapped data keys.
+
+## Data Model (Step 3)
+- User: auth identity with role, status, MFA flags, and org membership.
+- Organization: root container for users, departments, and shared secrets.
+- Department: organizational sub-scope for dept-wide secrets and access boundaries.
+- VaultItem: encrypted secret blob with metadata (title, type, favorite, timestamps).
+- VaultItemKey: per-recipient wrapped data key for each VaultItem.
+- ScopeKey: encrypted wrapping keys per org/dept scope, rotated and versioned.
+- UserKeyMaterial: stores salt, KDF params, and encrypted user key bundles.
+- RecoveryKey: optional recovery key public material + wrapped recovery data key.
+- AuditEvent: immutable security log for access, changes, admin actions.
+- Tag: system tags (admin-managed) and personal tags (owner-managed).
+- AccessGrant: explicit non-owner access with scope and expiry for shared secrets.

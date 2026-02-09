@@ -4,7 +4,7 @@
 
 **Started:**   
 **Location:** d:\password\new-manager 
-**Status:** Step 2 complete
+**Status:** Step 3 complete
 
 ## Session History
 
@@ -37,6 +37,11 @@
 **Current Step:** 2/9  
 **Final Action:** Documented cryptography design and primitives.  
 
+### Session 6: 
+**Status:** Step 3 completed  
+**Current Step:** 3/9  
+**Final Action:** Documented data model for Django/Postgres.  
+
 
 ---
 
@@ -45,7 +50,7 @@
 - [x] Step 0: set up project structure and dependencies 
 - [x] Step 1: Threat model + security goals 
 - [x] Step 2: Cryptography design 
-- [ ] Step 3: Data model (Django/Postgres) 
+- [x] Step 3: Data model (Django/Postgres) 
 - [ ] Step 4: Authorization + policy engine 
 - [ ] Step 5: API design 
 - [ ] Step 6: Browser crypto module 
@@ -112,3 +117,4 @@
 - Requirements rechecked; Gunicorn updated to latest stable version.
 - Latest stable versions verified via PyPI; Gunicorn pinned to `25.0.3`.
 - Step 2 cryptography design documented in `notes-and-decisions.md`.
+- Step 3 data model documented in `notes-and-decisions.md`.

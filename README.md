@@ -17,6 +17,13 @@ Dependencies are pinned to latest stable versions (checked 2026-02-09) in `backe
 - Envelope encryption with per-item data keys.
 - ECDH P-256 + AES-GCM for per-recipient data key wrapping.
 
+## Data Model Summary
+- Org -> Dept -> User hierarchy for scoping.
+- VaultItem with encrypted blob + metadata.
+- VaultItemKey per recipient (wrapped data key).
+- ScopeKey for org/dept wrapping key rotation.
+- AuditEvent for immutable security logs.
+
 ## Threat Model (Summary)
 - Assets: encrypted secrets, client master keys, org metadata, audit logs.
 - Trust boundaries: browser vs backend API vs database.

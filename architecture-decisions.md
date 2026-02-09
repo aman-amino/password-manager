@@ -22,3 +22,9 @@
 ## Access Control
 - Role permissions align with final-access-matrix.md and are enforced in policy checks.
 - Least privilege by default; explicit grants required for any cross-user access.
+
+## Data Model
+- Org -> Dept -> User hierarchy for scoping.
+- VaultItem stores encrypted blobs; VaultItemKey stores per-recipient wrapped data keys.
+- ScopeKey stores encrypted org/dept wrapping keys with rotation metadata.
+- AuditEvent provides immutable security logs.
