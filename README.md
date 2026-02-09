@@ -1,6 +1,7 @@
 # Django Password Manager (Zero-Knowledge)
 
 Maximum-security, zero-knowledge password manager with client-side cryptography and strict role-based access.
+Dependencies are pinned to latest stable versions (checked 2026-02-09) in `backend/requirements.txt`.
 
 ## Security Goals
 - Server never sees plaintext secrets or master keys.
@@ -28,6 +29,8 @@ Optional (once you add your backend code here):
 ```powershell
 pip install -r backend\requirements.txt
 ```
+
+If `python -m venv` or `ensurepip` fails with permission errors, run PowerShell as admin or fix your temp folder permissions, then retry.
 
 ## Docker (dev)
 

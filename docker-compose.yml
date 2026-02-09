@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pmdb
+      POSTGRES_USER: pm
+      POSTGRES_PASSWORD: pm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pm -d pmdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - internal
+
+  web:
+    build: ./backend
+    env_file:
+      - ./.env
+    environment:
+      DJANGO_SETTINGS_MODULE: app.settings
+    volumes:
+      - ./backend:/app:rw
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:
+
