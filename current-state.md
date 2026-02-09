@@ -7,4 +7,5 @@
 - Step 1 complete: Threat model and security goals documented
 - Step 2 complete: Cryptography design documented
 - Step 3 complete: Data model documented
+- Step 4 complete: Authorization and policy engine documented
 - Documentation trackers initialized

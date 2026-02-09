@@ -4,7 +4,7 @@
 
 **Started:**   
 **Location:** d:\password\new-manager 
-**Status:** Step 3 complete
+**Status:** Step 4 complete
 
 ## Session History
 
@@ -42,6 +42,11 @@
 **Current Step:** 3/9  
 **Final Action:** Documented data model for Django/Postgres.  
 
+### Session 7: 
+**Status:** Step 4 completed  
+**Current Step:** 4/9  
+**Final Action:** Documented authorization and policy engine rules.  
+
 
 ---
 
@@ -51,7 +56,7 @@
 - [x] Step 1: Threat model + security goals 
 - [x] Step 2: Cryptography design 
 - [x] Step 3: Data model (Django/Postgres) 
-- [ ] Step 4: Authorization + policy engine 
+- [x] Step 4: Authorization + policy engine 
 - [ ] Step 5: API design 
 - [ ] Step 6: Browser crypto module 
 - [ ] Step 7: Frontend flows 
@@ -118,3 +123,4 @@
 - Latest stable versions verified via PyPI; Gunicorn pinned to `25.0.3`.
 - Step 2 cryptography design documented in `notes-and-decisions.md`.
 - Step 3 data model documented in `notes-and-decisions.md`.
+- Step 4 authorization and policy engine documented in `notes-and-decisions.md`.

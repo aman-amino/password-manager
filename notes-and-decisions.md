@@ -46,3 +46,16 @@
 - AuditEvent: immutable security log for access, changes, admin actions.
 - Tag: system tags (admin-managed) and personal tags (owner-managed).
 - AccessGrant: explicit non-owner access with scope and expiry for shared secrets.
+
+## Authorization + Policy Engine (Step 4)
+- Authorization is centralized in a policy engine; all API endpoints call policy checks.
+- Roles: Superadmin, Admin, Subadmin, Regular User.
+- Enforced matrix: `final-access-matrix.md` is the source of truth for resource access.
+- Default deny: any action not explicitly allowed by policy is rejected.
+- Ownership rule: personal secrets are owner-only regardless of role.
+- Dept scope: Subadmin access limited to own department; Admin can access all departments.
+- Org scope: Superadmin/Admin can access org-wide non-personal secrets.
+- System tags: Superadmin/Admin manage; others read-only.
+- Recovery/reset actions: only Superadmin/Admin for allowed roles per matrix.
+- Sharing: AccessGrant required for any non-owner access; grants are time-bound and auditable.
+- Enforcement points: API layer, queryset filtering, and object-level permission checks.

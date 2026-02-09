@@ -24,6 +24,11 @@ Dependencies are pinned to latest stable versions (checked 2026-02-09) in `backe
 - ScopeKey for org/dept wrapping key rotation.
 - AuditEvent for immutable security logs.
 
+## Authorization Summary
+- Policy engine enforces `final-access-matrix.md`.
+- Default deny with explicit grants for non-owner access.
+- Personal secrets are always owner-only.
+
 ## Threat Model (Summary)
 - Assets: encrypted secrets, client master keys, org metadata, audit logs.
 - Trust boundaries: browser vs backend API vs database.

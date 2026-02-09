@@ -22,6 +22,7 @@
 ## Access Control
 - Role permissions align with final-access-matrix.md and are enforced in policy checks.
 - Least privilege by default; explicit grants required for any cross-user access.
+- Authorization is centralized in a policy engine with object-level checks and default deny.
 
 ## Data Model
 - Org -> Dept -> User hierarchy for scoping.

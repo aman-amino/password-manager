@@ -4,7 +4,7 @@
 - [x] Step 1: Threat model + security goals
 - [x] Step 2: Cryptography design
 - [x] Step 3: Data model (Django/Postgres)
-- [ ] Step 4: Authorization + policy engine
+- [x] Step 4: Authorization + policy engine
 - [ ] Step 5: API design
 - [ ] Step 6: Browser crypto module
 - [ ] Step 7: Frontend flows
