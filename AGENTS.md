@@ -47,6 +47,11 @@
 **Current Step:** 4/9  
 **Final Action:** Documented authorization and policy engine rules.  
 
+### Session 8: 
+**Status:** Backend scaffold created  
+**Current Step:** 4/9  
+**Final Action:** Added Django project scaffold, core apps, and security middleware.  
+
 
 ---
 
@@ -124,3 +129,4 @@
 - Step 2 cryptography design documented in `notes-and-decisions.md`.
 - Step 3 data model documented in `notes-and-decisions.md`.
 - Step 4 authorization and policy engine documented in `notes-and-decisions.md`.
+- Backend scaffold and security middleware documented in `notes-and-decisions.md`.

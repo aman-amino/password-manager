@@ -59,3 +59,9 @@
 - Recovery/reset actions: only Superadmin/Admin for allowed roles per matrix.
 - Sharing: AccessGrant required for any non-owner access; grants are time-bound and auditable.
 - Enforcement points: API layer, queryset filtering, and object-level permission checks.
+
+## Backend Scaffold (Step 0/1 Implementation)
+- Created Django project scaffold under `backend/config` with `manage.py`.
+- Added core apps `app` and `vault` with placeholder models.
+- Configured security middleware: SecurityMiddleware, Axes, CSP, and Whitenoise.
+- Added `/health/` endpoint for basic service liveness checks.

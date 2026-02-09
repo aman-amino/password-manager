@@ -1,6 +1,6 @@
 # Progress Tracker
 
-- [ ] Step 0: Restate scope + assumptions
+- [x] Step 0: Restate scope + assumptions
 - [x] Step 1: Threat model + security goals
 - [x] Step 2: Cryptography design
 - [x] Step 3: Data model (Django/Postgres)

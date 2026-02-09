@@ -51,6 +51,14 @@ pip install -r backend\requirements.txt
 
 If `python -m venv` or `ensurepip` fails with permission errors, run PowerShell as admin or fix your temp folder permissions, then retry.
 
+## Run Backend (dev)
+
+```powershell
+cd backend
+python manage.py migrate
+python manage.py runserver
+```
+
 ## Docker (dev)
 
 1. Create an env file:
