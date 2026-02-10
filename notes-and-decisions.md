@@ -77,3 +77,8 @@
 - Added AccessGrant for explicit non-owner sharing.
 - Added RecoveryKey for optional recovery flows.
 - Added AuditEvent for immutable security logs.
+
+## Step 4 Implementation (Authorization + Policy Engine)
+- Added policy engine with explicit `can_view`/`can_manage` decisions and reasons.
+- Enforced personal secrets owner-only in policy and queryset filters.
+- Added DRF object-level permission helper for vault items.

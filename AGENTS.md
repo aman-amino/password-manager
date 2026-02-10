@@ -67,6 +67,11 @@
 **Current Step:** 4/9  
 **Final Action:** Implemented data model extensions (Tag, AccessGrant, RecoveryKey, AuditEvent).  
 
+### Session 12: 
+**Status:** Step 4 code started  
+**Current Step:** 4/9  
+**Final Action:** Implemented policy engine and permissions for vault item access.  
+
 
 ---
 
@@ -148,3 +153,4 @@
 - Core auth models documented in `notes-and-decisions.md`.
 - Step 2 key material models documented in `notes-and-decisions.md`.
 - Step 3 data model extensions documented in `notes-and-decisions.md`.
+- Step 4 policy engine implementation documented in `notes-and-decisions.md`.

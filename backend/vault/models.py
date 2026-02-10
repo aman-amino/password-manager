@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from app.models import Department, Organization
 
@@ -61,6 +62,9 @@ class VaultItem(TimeStampedModel):
     is_favorite = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
 
+    def is_personal(self) -> bool:
+        return self.scope == self.Scope.PERSONAL
+
     class Meta:
         indexes = [
             models.Index(fields=["organization", "scope", "is_deleted"]),
@@ -114,6 +118,13 @@ class AccessGrant(TimeStampedModel):
 
     class Meta:
         unique_together = ("vault_item", "grantee")
+
+    def is_valid(self) -> bool:
+        if not self.is_active:
+            return False
+        if self.expires_at is None:
+            return True
+        return self.expires_at > timezone.now()
 
 
 class RecoveryKey(TimeStampedModel):

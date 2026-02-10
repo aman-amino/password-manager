@@ -12,4 +12,5 @@
 - Core auth models implemented (Organization, Department, User)
 - Key material models implemented (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey)
 - Data model extensions implemented (Tag, AccessGrant, RecoveryKey, AuditEvent)
+- Policy engine implemented (vault item authorization and queryset filters)
 - Documentation trackers initialized
