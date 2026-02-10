@@ -7,6 +7,6 @@
 - [x] Step 4: Authorization + policy engine
 - [x] Step 5: API design
 - [x] Step 6: Browser crypto module
-- [ ] Step 7: Frontend flows
+- [x] Step 7: Frontend flows
 - [ ] Step 8: Hardening checklist
 - [ ] Step 9: Verification

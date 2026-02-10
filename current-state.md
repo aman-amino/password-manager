@@ -15,4 +15,5 @@
 - Policy engine implemented (vault item authorization and queryset filters)
 - API endpoints implemented for vault items
 - Browser crypto module implemented (WebCrypto helpers)
+- Frontend flows scaffolded (static admin UI)
 - Documentation trackers initialized

@@ -62,6 +62,9 @@ python manage.py runserver
 ## Browser Crypto (Step 6)
 - WebCrypto helpers live in `frontend/crypto.js`.
 
+## Frontend Flows (Step 7)
+- Static admin UI mock in `frontend/index.html`.
+
 ## Docker (dev)
 
 1. Create an env file:
