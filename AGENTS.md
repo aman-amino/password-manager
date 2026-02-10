@@ -52,6 +52,11 @@
 **Current Step:** 4/9  
 **Final Action:** Added Django project scaffold, core apps, and security middleware.  
 
+### Session 9: 
+**Status:** Step 0/1 code started  
+**Current Step:** 4/9  
+**Final Action:** Implemented core auth models (Organization, Department, User) and admin registrations.  
+
 
 ---
 
@@ -130,3 +135,4 @@
 - Step 3 data model documented in `notes-and-decisions.md`.
 - Step 4 authorization and policy engine documented in `notes-and-decisions.md`.
 - Backend scaffold and security middleware documented in `notes-and-decisions.md`.
+- Core auth models documented in `notes-and-decisions.md`.

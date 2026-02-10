@@ -65,3 +65,4 @@
 - Added core apps `app` and `vault` with placeholder models.
 - Configured security middleware: SecurityMiddleware, Axes, CSP, and Whitenoise.
 - Added `/health/` endpoint for basic service liveness checks.
+- Implemented core auth data model: Organization, Department, and custom User with role and MFA flag.

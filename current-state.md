@@ -9,4 +9,5 @@
 - Step 3 complete: Data model documented
 - Step 4 complete: Authorization and policy engine documented
 - Backend code scaffolded (settings, URLs, health check)
+- Core auth models implemented (Organization, Department, User)
 - Documentation trackers initialized
