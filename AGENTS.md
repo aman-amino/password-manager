@@ -87,6 +87,11 @@
 **Current Step:** 7/9  
 **Final Action:** Implemented frontend flows UI scaffolding.  
 
+### Session 16: 
+**Status:** Step 8 completed  
+**Current Step:** 8/9  
+**Final Action:** Added hardening checklist.  
+
 
 ---
 
@@ -172,3 +177,4 @@
 - Step 5 API design implementation documented in `notes-and-decisions.md`.
 - Step 6 browser crypto module documented in `notes-and-decisions.md`.
 - Step 7 frontend flows documented in `notes-and-decisions.md`.
+- Step 8 hardening checklist documented in `notes-and-decisions.md`.

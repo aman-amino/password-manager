@@ -95,3 +95,6 @@
 ## Step 7 Implementation (Frontend Flows)
 - Added initial admin-style frontend layout with vault list, detail, and access request flows.
 - Implemented sidebar navigation and card-based secret grid.
+
+## Step 8 Implementation (Hardening Checklist)
+- Added `hardening-checklist.md` with security and deployment hardening items.

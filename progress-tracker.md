@@ -8,5 +8,5 @@
 - [x] Step 5: API design
 - [x] Step 6: Browser crypto module
 - [x] Step 7: Frontend flows
-- [ ] Step 8: Hardening checklist
+- [x] Step 8: Hardening checklist
 - [ ] Step 9: Verification

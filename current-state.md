@@ -16,4 +16,5 @@
 - API endpoints implemented for vault items
 - Browser crypto module implemented (WebCrypto helpers)
 - Frontend flows scaffolded (static admin UI)
+- Hardening checklist added
 - Documentation trackers initialized

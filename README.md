@@ -65,6 +65,9 @@ python manage.py runserver
 ## Frontend Flows (Step 7)
 - Static admin UI mock in `frontend/index.html`.
 
+## Hardening Checklist (Step 8)
+- See `hardening-checklist.md`.
+
 ## Docker (dev)
 
 1. Create an env file:
