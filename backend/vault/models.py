@@ -79,3 +79,71 @@ class VaultItemKey(TimeStampedModel):
 
     class Meta:
         unique_together = ("vault_item", "recipient")
+
+
+class Tag(TimeStampedModel):
+    class Kind(models.TextChoices):
+        SYSTEM = "system", "System"
+        PERSONAL = "personal", "Personal"
+
+    name = models.CharField(max_length=100)
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="tags")
+
+    class Meta:
+        unique_together = ("name", "kind", "owner")
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class VaultItemTag(TimeStampedModel):
+    vault_item = models.ForeignKey(VaultItem, on_delete=models.CASCADE, related_name="tag_links")
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="vault_links")
+
+    class Meta:
+        unique_together = ("vault_item", "tag")
+
+
+class AccessGrant(TimeStampedModel):
+    vault_item = models.ForeignKey(VaultItem, on_delete=models.CASCADE, related_name="access_grants")
+    grantee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="access_grants")
+    granted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="grants_given")
+    expires_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("vault_item", "grantee")
+
+
+class RecoveryKey(TimeStampedModel):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="recovery_key")
+    public_key = models.BinaryField()
+    wrapped_recovery_key = models.BinaryField()
+
+    def __str__(self) -> str:
+        return f"RecoveryKey({self.user_id})"
+
+
+class AuditEvent(TimeStampedModel):
+    class Action(models.TextChoices):
+        READ = "read", "Read"
+        CREATE = "create", "Create"
+        UPDATE = "update", "Update"
+        DELETE = "delete", "Delete"
+        LOGIN = "login", "Login"
+        ADMIN = "admin", "Admin"
+
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="audit_events")
+    organization = models.ForeignKey(Organization, null=True, blank=True, on_delete=models.SET_NULL, related_name="audit_events")
+    target_type = models.CharField(max_length=50)
+    target_id = models.CharField(max_length=64)
+    action = models.CharField(max_length=20, choices=Action.choices)
+    metadata = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["organization", "created_at"]),
+            models.Index(fields=["actor", "created_at"]),
+        ]

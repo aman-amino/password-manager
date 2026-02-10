@@ -62,6 +62,11 @@
 **Current Step:** 4/9  
 **Final Action:** Implemented key material models (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey).  
 
+### Session 11: 
+**Status:** Step 3 code completed  
+**Current Step:** 4/9  
+**Final Action:** Implemented data model extensions (Tag, AccessGrant, RecoveryKey, AuditEvent).  
+
 
 ---
 
@@ -142,3 +147,4 @@
 - Backend scaffold and security middleware documented in `notes-and-decisions.md`.
 - Core auth models documented in `notes-and-decisions.md`.
 - Step 2 key material models documented in `notes-and-decisions.md`.
+- Step 3 data model extensions documented in `notes-and-decisions.md`.

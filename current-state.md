@@ -11,4 +11,5 @@
 - Backend code scaffolded (settings, URLs, health check)
 - Core auth models implemented (Organization, Department, User)
 - Key material models implemented (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey)
+- Data model extensions implemented (Tag, AccessGrant, RecoveryKey, AuditEvent)
 - Documentation trackers initialized

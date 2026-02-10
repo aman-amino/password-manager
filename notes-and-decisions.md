@@ -71,3 +71,9 @@
 - Added `UserKeyMaterial` for KDF params and encrypted user key bundle.
 - Added `ScopeKey` for org/dept wrapping keys with versioning.
 - Added `VaultItem` and `VaultItemKey` for encrypted secrets and per-recipient wrapped keys.
+
+## Step 3 Implementation (Data Model)
+- Added Tag and VaultItemTag for system/personal tagging.
+- Added AccessGrant for explicit non-owner sharing.
+- Added RecoveryKey for optional recovery flows.
+- Added AuditEvent for immutable security logs.
