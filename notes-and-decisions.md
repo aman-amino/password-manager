@@ -105,6 +105,16 @@
 ## Step 9 Implementation (Verification)
 - Added `verification.md` with security, crypto, backend, and UI verification items.
 
+## Next Steps
+- Wire UI to live API data (vault list, detail, filters).
+- Add auth flow for UI and API (login, CSRF, session handling).
+- Create secret modal with WebCrypto integration.
+- Implement share/revoke UI for AccessGrant.
+- Add audit log view using AuditEvent.
+- Implement rotating admin URL for superadmin.
+- Add tests for policy engine and API permissions.
+- Keep `backend/staticfiles/` out of git; use `collectstatic` only for deployment.
+
 ## Environment Notes
 - Updated django-csp settings to new `CONTENT_SECURITY_POLICY` format.
 - Added Axes authentication backend and removed deprecated settings.

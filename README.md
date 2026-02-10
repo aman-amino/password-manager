@@ -74,6 +74,16 @@ python manage.py runserver
 ## Django UI
 - ChatGPT-like UI scaffold served at `/`.
 
+## Next Steps
+1. Wire UI to live data from `/api/vault-items/` (list, detail, search).
+2. Implement auth flow (login, session, CSRF) so API calls succeed.
+3. Add create/edit secret modal + client-side crypto integration.
+4. Implement access grants UI (share/revoke) backed by `AccessGrant`.
+5. Add audit log view backed by `AuditEvent`.
+6. Implement rotating admin URL for superadmin.
+7. Add tests for policy engine and API permissions.
+8. Run migrations and seed initial org/admin data.
+
 ## Docker (dev)
 
 1. Create an env file:

@@ -4,7 +4,7 @@
 
 **Started:**   
 **Location:** d:\password\new-manager 
-**Status:** Step 4 complete
+**Status:** Step 9 complete
 
 ## Session History
 
@@ -117,6 +117,16 @@
 **Current Step:** 9/9  
 **Final Action:** Allowed Bootstrap CDN and Google Fonts in CSP; fixed STATIC_URL.  
 
+### Session 22: 
+**Status:** Next steps documented  
+**Current Step:** 9/9  
+**Final Action:** Added prioritized next steps list.  
+
+### Session 23: 
+**Status:** Ignore staticfiles  
+**Current Step:** 9/9  
+**Final Action:** Ignored collected static files and removed from git tracking.  
+
 
 ---
 
@@ -127,11 +137,11 @@
 - [x] Step 2: Cryptography design 
 - [x] Step 3: Data model (Django/Postgres) 
 - [x] Step 4: Authorization + policy engine 
-- [ ] Step 5: API design 
-- [ ] Step 6: Browser crypto module 
-- [ ] Step 7: Frontend flows 
-- [ ] Step 8: Hardening checklist 
-- [ ] Step 9: Verification 
+- [x] Step 5: API design 
+- [x] Step 6: Browser crypto module 
+- [x] Step 7: Frontend flows 
+- [x] Step 8: Hardening checklist 
+- [x] Step 9: Verification 
 
 ---
 
@@ -160,6 +170,7 @@
 **Django Project:** Initialized (Core apps: `vault`, `app`)
 **Database:** SQLite for development, PostgreSQL-ready
 **Dependencies:** Pinned to latest stable versions in `backend/requirements.txt`
+**Staticfiles:** `backend/staticfiles/` ignored (collectstatic output)
 
 ## rules
 1. Always use the latest version of Django and Django REST Framework
@@ -208,3 +219,5 @@
 - Dev routing/static fixes documented in `notes-and-decisions.md`.
 - UI scaffold documented in `notes-and-decisions.md`.
 - CSP/static fixes documented in `notes-and-decisions.md`.
+- Next steps documented in `notes-and-decisions.md`.
+- Staticfiles ignore documented in `notes-and-decisions.md`.

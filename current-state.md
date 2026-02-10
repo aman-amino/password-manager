@@ -22,4 +22,6 @@
 - Root endpoint added and static serving enabled in DEBUG
 - Django UI scaffold added for ChatGPT-like admin experience
 - CSP updated for Bootstrap/Fonts and static URL fixed
+- Next steps documented in `notes-and-decisions.md`
+- Collected static files are ignored (`backend/staticfiles/`)
 - Documentation trackers initialized
