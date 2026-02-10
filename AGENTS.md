@@ -72,6 +72,11 @@
 **Current Step:** 4/9  
 **Final Action:** Implemented policy engine and permissions for vault item access.  
 
+### Session 13: 
+**Status:** Step 5 code completed  
+**Current Step:** 5/9  
+**Final Action:** Implemented VaultItem API endpoints and serializers.  
+
 
 ---
 
@@ -154,3 +159,4 @@
 - Step 2 key material models documented in `notes-and-decisions.md`.
 - Step 3 data model extensions documented in `notes-and-decisions.md`.
 - Step 4 policy engine implementation documented in `notes-and-decisions.md`.
+- Step 5 API design implementation documented in `notes-and-decisions.md`.

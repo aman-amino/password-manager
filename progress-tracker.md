@@ -5,7 +5,7 @@
 - [x] Step 2: Cryptography design
 - [x] Step 3: Data model (Django/Postgres)
 - [x] Step 4: Authorization + policy engine
-- [ ] Step 5: API design
+- [x] Step 5: API design
 - [ ] Step 6: Browser crypto module
 - [ ] Step 7: Frontend flows
 - [ ] Step 8: Hardening checklist

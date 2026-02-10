@@ -13,4 +13,5 @@
 - Key material models implemented (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey)
 - Data model extensions implemented (Tag, AccessGrant, RecoveryKey, AuditEvent)
 - Policy engine implemented (vault item authorization and queryset filters)
+- API endpoints implemented for vault items
 - Documentation trackers initialized

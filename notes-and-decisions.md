@@ -82,3 +82,8 @@
 - Added policy engine with explicit `can_view`/`can_manage` decisions and reasons.
 - Enforced personal secrets owner-only in policy and queryset filters.
 - Added DRF object-level permission helper for vault items.
+
+## Step 5 Implementation (API Design)
+- Added VaultItem API endpoints with DRF ViewSet.
+- Added serializer with server-side ownership/org scoping.
+- Wired API under `/api/vault-items/`.
