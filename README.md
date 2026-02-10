@@ -68,6 +68,9 @@ python manage.py runserver
 ## Hardening Checklist (Step 8)
 - See `hardening-checklist.md`.
 
+## Verification (Step 9)
+- See `verification.md`.
+
 ## Docker (dev)
 
 1. Create an env file:

@@ -9,4 +9,4 @@
 - [x] Step 6: Browser crypto module
 - [x] Step 7: Frontend flows
 - [x] Step 8: Hardening checklist
-- [ ] Step 9: Verification
+- [x] Step 9: Verification

@@ -98,3 +98,6 @@
 
 ## Step 8 Implementation (Hardening Checklist)
 - Added `hardening-checklist.md` with security and deployment hardening items.
+
+## Step 9 Implementation (Verification)
+- Added `verification.md` with security, crypto, backend, and UI verification items.

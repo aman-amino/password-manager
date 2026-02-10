@@ -17,4 +17,5 @@
 - Browser crypto module implemented (WebCrypto helpers)
 - Frontend flows scaffolded (static admin UI)
 - Hardening checklist added
+- Verification checklist added
 - Documentation trackers initialized
