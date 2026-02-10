@@ -87,3 +87,7 @@
 - Added VaultItem API endpoints with DRF ViewSet.
 - Added serializer with server-side ownership/org scoping.
 - Wired API under `/api/vault-items/`.
+
+## Step 6 Implementation (Browser Crypto Module)
+- Added WebCrypto utility module with PBKDF2, HKDF, AES-256-GCM helpers.
+- Included base64 and UTF-8 helpers for client-side data handling.

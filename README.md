@@ -59,6 +59,9 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+## Browser Crypto (Step 6)
+- WebCrypto helpers live in `frontend/crypto.js`.
+
 ## Docker (dev)
 
 1. Create an env file:
