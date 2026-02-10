@@ -9,3 +9,5 @@ manager3.pub
 agent.md.bak
 new
 new.ppk
+*.sqlite3
+backend/db.sqlite3
