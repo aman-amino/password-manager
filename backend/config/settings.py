@@ -82,7 +82,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.User"
@@ -109,10 +109,11 @@ AXES_RESET_ON_SUCCESS = True
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": ("'self'",),
-        "script-src": ("'self'",),
-        "style-src": ("'self'",),
+        "script-src": ("'self'", "https://cdn.jsdelivr.net"),
+        "style-src": ("'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"),
+        "style-src-elem": ("'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"),
         "img-src": ("'self'", "data:"),
-        "font-src": ("'self'", "data:"),
+        "font-src": ("'self'", "data:", "https://fonts.gstatic.com"),
         "connect-src": ("'self'",),
     }
 }

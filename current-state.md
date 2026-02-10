@@ -21,4 +21,5 @@
 - CSP and Axes settings updated to current versions
 - Root endpoint added and static serving enabled in DEBUG
 - Django UI scaffold added for ChatGPT-like admin experience
+- CSP updated for Bootstrap/Fonts and static URL fixed
 - Documentation trackers initialized

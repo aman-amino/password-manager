@@ -23,6 +23,7 @@
 - Rechecked package versions on 2026-02-09; Gunicorn pinned to `25.0.3`.
 - Added root endpoint and dev static serving to reduce 404s during local runserver.
 - Added ChatGPT-like Django UI scaffold using Bootstrap 5.3.3.
+- Updated CSP to allow Bootstrap CDN and Google Fonts; fixed STATIC_URL for dev static serving.
 
 ## Cryptography Design (Step 2)
 - Client-side only: all encryption and decryption happens in the browser via WebCrypto.

@@ -112,6 +112,11 @@
 **Current Step:** 9/9  
 **Final Action:** Added ChatGPT-like Django UI scaffold and assets.  
 
+### Session 21: 
+**Status:** CSP/static fix  
+**Current Step:** 9/9  
+**Final Action:** Allowed Bootstrap CDN and Google Fonts in CSP; fixed STATIC_URL.  
+
 
 ---
 
@@ -202,3 +207,4 @@
 - CSP/Axes config fixes documented in `notes-and-decisions.md`.
 - Dev routing/static fixes documented in `notes-and-decisions.md`.
 - UI scaffold documented in `notes-and-decisions.md`.
+- CSP/static fixes documented in `notes-and-decisions.md`.
