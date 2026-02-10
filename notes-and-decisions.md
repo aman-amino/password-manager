@@ -101,3 +101,7 @@
 
 ## Step 9 Implementation (Verification)
 - Added `verification.md` with security, crypto, backend, and UI verification items.
+
+## Environment Notes
+- Updated django-csp settings to new `CONTENT_SECURITY_POLICY` format.
+- Added Axes authentication backend and removed deprecated settings.

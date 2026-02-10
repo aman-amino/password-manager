@@ -18,4 +18,5 @@
 - Frontend flows scaffolded (static admin UI)
 - Hardening checklist added
 - Verification checklist added
+- CSP and Axes settings updated to current versions
 - Documentation trackers initialized

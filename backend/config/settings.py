@@ -3,6 +3,7 @@ from pathlib import Path
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
+from datetime import timedelta
 import os
 
 
@@ -96,18 +97,25 @@ REST_FRAMEWORK = {
     ],
 }
 
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", "5"))
-AXES_LOCKOUT_CALLABLE = "axes.helpers.is_allowed"
-AXES_COOLOFF_TIME = int(os.getenv("AXES_COOLOFF_TIME_MINUTES", "15"))
-AXES_ONLY_USER_FAILURES = True
+AXES_COOLOFF_TIME = timedelta(minutes=int(os.getenv("AXES_COOLOFF_TIME_MINUTES", "15")))
 AXES_RESET_ON_SUCCESS = True
 
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'",)
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_FONT_SRC = ("'self'", "data:")
-CSP_CONNECT_SRC = ("'self'",)
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": ("'self'",),
+        "style-src": ("'self'",),
+        "img-src": ("'self'", "data:"),
+        "font-src": ("'self'", "data:"),
+        "connect-src": ("'self'",),
+    }
+}
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True

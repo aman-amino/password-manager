@@ -97,6 +97,11 @@
 **Current Step:** 9/9  
 **Final Action:** Added verification checklist.  
 
+### Session 18: 
+**Status:** Config fixes  
+**Current Step:** 9/9  
+**Final Action:** Updated CSP settings and Axes auth backend to fix system checks.  
+
 
 ---
 
@@ -184,3 +189,4 @@
 - Step 7 frontend flows documented in `notes-and-decisions.md`.
 - Step 8 hardening checklist documented in `notes-and-decisions.md`.
 - Step 9 verification documented in `notes-and-decisions.md`.
+- CSP/Axes config fixes documented in `notes-and-decisions.md`.
