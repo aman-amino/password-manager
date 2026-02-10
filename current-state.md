@@ -10,4 +10,5 @@
 - Step 4 complete: Authorization and policy engine documented
 - Backend code scaffolded (settings, URLs, health check)
 - Core auth models implemented (Organization, Department, User)
+- Key material models implemented (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey)
 - Documentation trackers initialized

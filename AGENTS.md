@@ -57,6 +57,11 @@
 **Current Step:** 4/9  
 **Final Action:** Implemented core auth models (Organization, Department, User) and admin registrations.  
 
+### Session 10: 
+**Status:** Step 2 code started  
+**Current Step:** 4/9  
+**Final Action:** Implemented key material models (UserKeyMaterial, ScopeKey, VaultItem, VaultItemKey).  
+
 
 ---
 
@@ -136,3 +141,4 @@
 - Step 4 authorization and policy engine documented in `notes-and-decisions.md`.
 - Backend scaffold and security middleware documented in `notes-and-decisions.md`.
 - Core auth models documented in `notes-and-decisions.md`.
+- Step 2 key material models documented in `notes-and-decisions.md`.

@@ -66,3 +66,8 @@
 - Configured security middleware: SecurityMiddleware, Axes, CSP, and Whitenoise.
 - Added `/health/` endpoint for basic service liveness checks.
 - Implemented core auth data model: Organization, Department, and custom User with role and MFA flag.
+
+## Step 2 Implementation (Key Material Models)
+- Added `UserKeyMaterial` for KDF params and encrypted user key bundle.
+- Added `ScopeKey` for org/dept wrapping keys with versioning.
+- Added `VaultItem` and `VaultItemKey` for encrypted secrets and per-recipient wrapped keys.
