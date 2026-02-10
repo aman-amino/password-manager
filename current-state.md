@@ -19,4 +19,5 @@
 - Hardening checklist added
 - Verification checklist added
 - CSP and Axes settings updated to current versions
+- Root endpoint added and static serving enabled in DEBUG
 - Documentation trackers initialized

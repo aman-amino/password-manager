@@ -102,6 +102,11 @@
 **Current Step:** 9/9  
 **Final Action:** Updated CSP settings and Axes auth backend to fix system checks.  
 
+### Session 19: 
+**Status:** Dev routing fixes  
+**Current Step:** 9/9  
+**Final Action:** Added root endpoint and DEBUG static serving to prevent 404s in dev.  
+
 
 ---
 
@@ -190,3 +195,4 @@
 - Step 8 hardening checklist documented in `notes-and-decisions.md`.
 - Step 9 verification documented in `notes-and-decisions.md`.
 - CSP/Axes config fixes documented in `notes-and-decisions.md`.
+- Dev routing/static fixes documented in `notes-and-decisions.md`.
