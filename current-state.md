@@ -20,4 +20,5 @@
 - Verification checklist added
 - CSP and Axes settings updated to current versions
 - Root endpoint added and static serving enabled in DEBUG
+- Django UI scaffold added for ChatGPT-like admin experience
 - Documentation trackers initialized

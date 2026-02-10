@@ -71,6 +71,9 @@ python manage.py runserver
 ## Verification (Step 9)
 - See `verification.md`.
 
+## Django UI
+- ChatGPT-like UI scaffold served at `/`.
+
 ## Docker (dev)
 
 1. Create an env file:

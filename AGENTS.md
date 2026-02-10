@@ -107,6 +107,11 @@
 **Current Step:** 9/9  
 **Final Action:** Added root endpoint and DEBUG static serving to prevent 404s in dev.  
 
+### Session 20: 
+**Status:** UI scaffold  
+**Current Step:** 9/9  
+**Final Action:** Added ChatGPT-like Django UI scaffold and assets.  
+
 
 ---
 
@@ -196,3 +201,4 @@
 - Step 9 verification documented in `notes-and-decisions.md`.
 - CSP/Axes config fixes documented in `notes-and-decisions.md`.
 - Dev routing/static fixes documented in `notes-and-decisions.md`.
+- UI scaffold documented in `notes-and-decisions.md`.

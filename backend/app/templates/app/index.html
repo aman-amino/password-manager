@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vault Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    >
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'app/styles.css' %}">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">V</div>
+          <div>
+            <div class="brand-title">Vault</div>
+            <div class="brand-sub">Zero-knowledge ops</div>
+          </div>
+        </div>
+        <nav class="nav flex-column gap-2">
+          <button class="nav-link active" data-view="vault">Vault</button>
+          <button class="nav-link" data-view="sharing">Sharing</button>
+          <button class="nav-link" data-view="people">People</button>
+          <button class="nav-link" data-view="audit">Audit</button>
+          <button class="nav-link" data-view="settings">Settings</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="small text-muted">Signed in</div>
+          <div class="fw-semibold">superadmin@vault</div>
+          <button class="btn btn-outline-light btn-sm mt-3">Open Admin</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="content-header">
+          <div>
+            <h1 class="h3 mb-1">Secure Workspace</h1>
+            <div class="text-muted">Encrypted secrets and policy-driven access.</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-light">Import</button>
+            <button class="btn btn-primary">New Secret</button>
+          </div>
+        </header>
+
+        <section class="panel spotlight">
+          <div class="spotlight-content">
+            <h2 class="h4">Policy Console</h2>
+            <p class="text-muted mb-0">
+              Instant visibility into org, dept, and personal scopes with zero-knowledge guarantees.
+            </p>
+          </div>
+          <div class="spotlight-actions">
+            <button class="btn btn-outline-light">Rotate Scope Keys</button>
+            <button class="btn btn-success">Review Access</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div class="search">
+              <input class="form-control" placeholder="Search secrets, tags, users">
+            </div>
+            <div class="filters">
+              <button class="btn btn-sm btn-outline-secondary">All</button>
+              <button class="btn btn-sm btn-outline-secondary">Personal</button>
+              <button class="btn btn-sm btn-outline-secondary">Dept</button>
+              <button class="btn btn-sm btn-outline-secondary">Org</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="vault-grid">
+              <div class="vault-card">
+                <div class="card-title">Prod Admin</div>
+                <div class="card-meta">Org · Updated 2h ago</div>
+                <div class="card-tags">
+                  <span class="tag">critical</span>
+                  <span class="tag">infra</span>
+                </div>
+              </div>
+              <div class="vault-card">
+                <div class="card-title">HR Payroll</div>
+                <div class="card-meta">Dept · Updated 1d ago</div>
+                <div class="card-tags">
+                  <span class="tag">dept</span>
+                </div>
+              </div>
+              <div class="vault-card">
+                <div class="card-title">Personal MFA</div>
+                <div class="card-meta">Personal · Updated 3d ago</div>
+                <div class="card-tags">
+                  <span class="tag">personal</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel split">
+          <div class="panel-body">
+            <h2 class="h5">Secret Details</h2>
+            <div class="detail-row">
+              <div class="text-muted">Owner</div>
+              <div>superadmin@vault</div>
+            </div>
+            <div class="detail-row">
+              <div class="text-muted">Scope</div>
+              <div>Organization</div>
+            </div>
+            <div class="detail-row">
+              <div class="text-muted">Sharing</div>
+              <div>3 recipients</div>
+            </div>
+            <div class="detail-row">
+              <div class="text-muted">Last Access</div>
+              <div>Today 09:12</div>
+            </div>
+            <button class="btn btn-outline-light mt-3">Rotate Key</button>
+          </div>
+          <div class="panel-body">
+            <h2 class="h5">Access Requests</h2>
+            <ul class="list-unstyled">
+              <li class="request">
+                <div>
+                  <div class="fw-semibold">alex@vault</div>
+                  <div class="text-muted small">Dept access · 2h ago</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-success">Approve</button>
+                  <button class="btn btn-sm btn-outline-danger">Deny</button>
+                </div>
+              </li>
+              <li class="request">
+                <div>
+                  <div class="fw-semibold">sam@vault</div>
+                  <div class="text-muted small">Org access · 1d ago</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-success">Approve</button>
+                  <button class="btn btn-sm btn-outline-danger">Deny</button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="{% static 'app/app.js' %}"></script>
+  </body>
+</html>
