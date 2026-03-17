@@ -31,3 +31,8 @@
     - Superadmin visibility fixed in policy engine
     - Security settings hardened for production
     - Backend tests added for core security logic
+- Step 11 complete: Final refinements and production roadmap
+    - Admin rotation refined (POST method, strict middleware)
+    - UI logic for admin rotation added
+    - Audit logging expanded to list operations
+    - Production upgrade plan documented

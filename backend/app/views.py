@@ -28,6 +28,9 @@ def health_check(request):
 @require_POST
 @user_passes_test(is_superadmin)
 def rotate_admin_url(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
     # Deactivate old tokens
     AdminConfig.objects.all().update(is_active=False)
     # Create new token
