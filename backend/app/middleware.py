@@ -1,6 +1,8 @@
 from django import shortcuts
 from django.http import Http404
 from .models import AdminConfig
+from vault.utils import log_audit_event
+from vault.models import AuditEvent
 
 class AdminTokenMiddleware:
     def __init__(self, get_response):
@@ -20,6 +22,13 @@ class AdminTokenMiddleware:
                         response = self.get_response(request)
                         return response
                     if not AdminConfig.objects.filter(admin_token=token, is_active=True).exists():
+                        log_audit_event(
+                            request,
+                            action=AuditEvent.Action.ADMIN,
+                            target_type="admin_access",
+                            target_id="unauthorized",
+                            metadata={"path": path, "reason": "invalid_or_expired_token"}
+                        )
                         raise Http404("Admin URL expired or invalid")
 
         response = self.get_response(request)

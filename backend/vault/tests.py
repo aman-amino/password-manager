@@ -1,5 +1,7 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
+from django.contrib.auth import authenticate, login
+from django.contrib.sessions.middleware import SessionMiddleware
 from rest_framework import status
 from rest_framework.test import APITestCase
 from app.models import Organization, Department, User, AdminConfig
@@ -95,3 +97,60 @@ class AdminRotationTests(APITestCase):
         # Invalid token should 404
         response = self.client.get("/admin_wrong-token/")
         self.assertEqual(response.status_code, 404)
+
+class SecurityAuditLoggingTests(APITestCase):
+    def setUp(self):
+        self.superadmin = User.objects.create_user(
+            username="superadmin", password="password", role=User.Role.SUPERADMIN
+        )
+        self.user = User.objects.create_user(
+            username="testuser", password="password", role=User.Role.USER
+        )
+
+    def test_login_audit_logging(self):
+        """Successful login should be logged."""
+        factory = RequestFactory()
+        request = factory.post('/login/')
+
+        # Add session
+        middleware = SessionMiddleware(lambda r: None)
+        middleware.process_request(request)
+        request.session.save()
+
+        user = authenticate(request, username='testuser', password='password')
+        request.user = user
+        login(request, user)
+
+        self.assertTrue(AuditEvent.objects.filter(
+            actor=self.user,
+            action=AuditEvent.Action.LOGIN,
+            target_type="user",
+            target_id=str(self.user.id)
+        ).exists())
+
+    def test_rotate_admin_audit_logging(self):
+        """Admin URL rotation should be logged."""
+        self.client.force_login(user=self.superadmin)
+        url = reverse("rotate_admin")
+        self.client.get(url)
+
+        self.assertTrue(AuditEvent.objects.filter(
+            actor=self.superadmin,
+            action=AuditEvent.Action.ADMIN,
+            metadata__action="rotate_admin_url"
+        ).exists())
+
+    def test_unauthorized_admin_audit_logging(self):
+        """Unauthorized admin access should be logged."""
+        # Create an active token so the middleware doesn't bypass
+        AdminConfig.objects.create(admin_token="valid-token", is_active=True)
+
+        # Access with invalid token
+        self.client.get("/admin_invalid-token/")
+
+        self.assertTrue(AuditEvent.objects.filter(
+            action=AuditEvent.Action.ADMIN,
+            target_type="admin_access",
+            target_id="unauthorized",
+            metadata__reason="invalid_or_expired_token"
+        ).exists())
