@@ -32,6 +32,14 @@ class Department(TimeStampedModel):
         return f"{self.organization.name} / {self.name}"
 
 
+class AdminConfig(TimeStampedModel):
+    admin_token = models.CharField(max_length=64, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return f"AdminToken({self.admin_token[:8]}...)"
+
+
 class User(AbstractUser):
     class Role(models.TextChoices):
         SUPERADMIN = "superadmin", "Superadmin"
