@@ -110,10 +110,27 @@
 - Add auth flow for UI and API (login, CSRF, session handling).
 - Create secret modal with WebCrypto integration.
 - Implement share/revoke UI for AccessGrant.
-- Add audit log view using AuditEvent.
-- Implement rotating admin URL for superadmin.
-- Add tests for policy engine and API permissions.
+- Added audit log view using AuditEvent. (Mock UI only, API logging implemented in Step 10)
+- Implement rotating admin URL for superadmin. (Implemented in Step 10)
+- Add tests for policy engine and API permissions. (Implemented in Step 10)
 - Keep `backend/staticfiles/` out of git; use `collectstatic` only for deployment.
+
+## Security Enhancements and Bug Fixes (Step 10)
+- Audit Logging: Integrated `log_audit_event` into `VaultItemViewSet` for all CRUD actions.
+- Rotating Admin URL:
+    - Added `AdminConfig` model to store active admin tokens.
+    - Added `AdminTokenMiddleware` to enforce token-based access to `/admin_.../` paths.
+    - Added `rotate_admin_url` view for superadmins to generate new tokens.
+- Superadmin Visibility: Updated policy engine to allow superadmins access to all non-personal items across organizations.
+- Refined Permissions: Introduced `CanManageVaultItem` DRF permission class for cleaner object-level checks.
+- Hardened Settings: Updated `settings.py` with HSTS, secure cookies, and SSL redirect defaults for non-debug environments.
+- Verification: Added comprehensive backend tests in `backend/vault/tests.py` covering policy, audit logging, and admin rotation.
+
+## Final Refinements and Production Roadmap (Step 11)
+- Admin Token Middleware: Updated to use `path.startswith` and more strict splitting to avoid false positives.
+- Admin Rotation: View now requires POST method for security; UI (app.js) updated to call this securely with CSRF.
+- Bulk Auditing: Added audit logging for list operations to track broad vault access.
+- Production Roadmap: Created `production-upgrade-plan.md` to guide future development.
 
 ## Environment Notes
 - Updated django-csp settings to new `CONTENT_SECURITY_POLICY` format.

@@ -50,11 +50,16 @@ def can_manage_vault_item(user: User, item: VaultItem) -> PolicyDecision:
 def vault_item_queryset_for_user(user: User):
     if not user.is_authenticated:
         return VaultItem.objects.none()
+
+    if user.role == User.Role.SUPERADMIN:
+        # Superadmins see everything except other people's personal items
+        return VaultItem.objects.filter(is_deleted=False).exclude(
+            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user)
+        )
+
     base = VaultItem.objects.filter(is_deleted=False, organization=user.organization).exclude(
         Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user)
     )
-    if user.role == User.Role.SUPERADMIN:
-        return base
     if user.role == User.Role.ADMIN:
         return base
     if user.role == User.Role.SUBADMIN:

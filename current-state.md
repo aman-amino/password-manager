@@ -25,3 +25,14 @@
 - Next steps documented in `notes-and-decisions.md`
 - Collected static files are ignored (`backend/staticfiles/`)
 - Documentation trackers initialized
+- Step 10 complete: Security enhancements and bug fixes
+    - Audit logging integrated into VaultItemViewSet
+    - Rotating admin URL implemented with `AdminConfig` and `AdminTokenMiddleware`
+    - Superadmin visibility fixed in policy engine
+    - Security settings hardened for production
+    - Backend tests added for core security logic
+- Step 11 complete: Final refinements and production roadmap
+    - Admin rotation refined (POST method, strict middleware)
+    - UI logic for admin rotation added
+    - Audit logging expanded to list operations
+    - Production upgrade plan documented
