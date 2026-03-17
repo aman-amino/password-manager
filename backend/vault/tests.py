@@ -73,18 +73,24 @@ class AdminRotationTests(APITestCase):
             username="superadmin", password="password", role=User.Role.SUPERADMIN
         )
 
-    def test_rotate_admin_url(self):
+    def test_rotate_admin_url_post(self):
         self.superadmin.is_staff = True
         self.superadmin.is_superuser = True
         self.superadmin.save()
         self.client.force_login(user=self.superadmin)
         url = reverse("rotate_admin")
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("admin_url", data)
         token = data["admin_url"].split("_")[1].strip("/")
         self.assertTrue(AdminConfig.objects.filter(admin_token__startswith=token, is_active=True).exists())
+
+    def test_rotate_admin_url_get_fails(self):
+        self.client.force_login(user=self.superadmin)
+        url = reverse("rotate_admin")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)
 
     def test_admin_middleware_protection(self):
         # Create an active token
@@ -132,7 +138,7 @@ class SecurityAuditLoggingTests(APITestCase):
         """Admin URL rotation should be logged."""
         self.client.force_login(user=self.superadmin)
         url = reverse("rotate_admin")
-        self.client.get(url)
+        self.client.post(url)
 
         self.assertTrue(AuditEvent.objects.filter(
             actor=self.superadmin,

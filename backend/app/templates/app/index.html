@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{% static 'app/styles.css' %}">
   </head>
   <body>
+    {% csrf_token %}
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">

@@ -1,8 +1,9 @@
 import secrets
 from django.contrib.auth.decorators import user_passes_test
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .models import AdminConfig, User
 from vault.utils import log_audit_event
 from vault.models import AuditEvent
@@ -24,6 +25,7 @@ def health_check(request):
     return JsonResponse({"status": "ok"})
 
 
+@require_POST
 @user_passes_test(is_superadmin)
 def rotate_admin_url(request):
     # Deactivate old tokens
