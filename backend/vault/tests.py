@@ -77,7 +77,7 @@ class AdminRotationTests(APITestCase):
         self.superadmin.save()
         self.client.force_login(user=self.superadmin)
         url = reverse("rotate_admin")
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("admin_url", data)
