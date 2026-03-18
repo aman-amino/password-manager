@@ -12,3 +12,8 @@
 **Vulnerability:** Incorrect HKDF key derivation from PBKDF2 in `frontend/crypto.js`.
 **Learning:** WebCrypto `deriveKey` has specific expectations for the output key type. When chaining KDFs (PBKDF2 -> HKDF), it's often more reliable to use `deriveBits` for the intermediate secret.
 **Prevention:** Use standard, tested cryptographic libraries where possible, and always verify derivation logic against official WebCrypto examples.
+
+## 2025-05-15 - [Temporal Authorization Failure]
+**Vulnerability:** Access grants were checked for activity status but not for expiration time in `vault/policy.py`.
+**Learning:** Time-based access control must explicitly check current system time against expiration fields in all authorization paths (both individual object checks and queryset filtering).
+**Prevention:** Implement a central helper for checking grant validity that includes both active status and temporal constraints.

@@ -1,11 +1,13 @@
+from datetime import timedelta
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 from app.models import Organization, Department, User, AdminConfig
-from vault.models import VaultItem, AuditEvent
+from vault.models import VaultItem, AuditEvent, AccessGrant
 
 class VaultItemPolicyTests(APITestCase):
     def setUp(self):
@@ -160,3 +162,49 @@ class SecurityAuditLoggingTests(APITestCase):
             target_id="unauthorized",
             metadata__reason="invalid_or_expired_token"
         ).exists())
+
+class AccessGrantExpirationTests(APITestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name="Exp Org", slug="exp-org")
+        self.user_a = User.objects.create_user(
+            username="userA", password="password", role=User.Role.USER, organization=self.org
+        )
+        self.user_b = User.objects.create_user(
+            username="userB", password="password", role=User.Role.USER, organization=self.org
+        )
+        # item must belong to the organization for user_b (in same org) to potentially see it via grant
+        self.item = VaultItem.objects.create(
+            owner=self.user_a, organization=self.org,
+            scope=VaultItem.Scope.PERSONAL, title="Shared Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+
+    def test_active_unexpired_grant_allowed(self):
+        """Active and unexpired grant should allow access."""
+        future = timezone.now() + timedelta(days=1)
+        AccessGrant.objects.create(
+            vault_item=self.item, grantee=self.user_b, granted_by=self.user_a,
+            is_active=True, expires_at=future
+        )
+        self.client.force_authenticate(user=self.user_b)
+        url = reverse("vault-item-detail", args=[self.item.id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_expired_grant_denied(self):
+        """Expired grant should deny access even if is_active is True."""
+        past = timezone.now() - timedelta(days=1)
+        AccessGrant.objects.create(
+            vault_item=self.item, grantee=self.user_b, granted_by=self.user_a,
+            is_active=True, expires_at=past
+        )
+        self.client.force_authenticate(user=self.user_b)
+        url = reverse("vault-item-detail", args=[self.item.id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # List view check
+        url_list = reverse("vault-item-list")
+        response_list = self.client.get(url_list, follow=True)
+        ids = [item["id"] for item in response_list.data]
+        self.assertNotIn(self.item.id, ids)
