@@ -126,12 +126,6 @@
 - Hardened Settings: Updated `settings.py` with HSTS, secure cookies, and SSL redirect defaults for non-debug environments.
 - Verification: Added comprehensive backend tests in `backend/vault/tests.py` covering policy, audit logging, and admin rotation.
 
-## Final Refinements and Production Roadmap (Step 11)
-- Admin Token Middleware: Updated to use `path.startswith` and more strict splitting to avoid false positives.
-- Admin Rotation: View now requires POST method for security; UI (app.js) updated to call this securely with CSRF.
-- Bulk Auditing: Added audit logging for list operations to track broad vault access.
-- Production Roadmap: Created `production-upgrade-plan.md` to guide future development.
-
 ## Environment Notes
 - Updated django-csp settings to new `CONTENT_SECURITY_POLICY` format.
 - Added Axes authentication backend and removed deprecated settings.

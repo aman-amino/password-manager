@@ -7,8 +7,11 @@ def log_audit_event(request, action, target_type, target_id, organization=None, 
     if metadata is None:
         metadata = {}
 
-    actor = request.user if request.user.is_authenticated else None
-    ip_address = request.META.get('REMOTE_ADDR')
+    actor = getattr(request, 'user', None)
+    if actor and not actor.is_authenticated:
+        actor = None
+
+    ip_address = request.META.get('REMOTE_ADDR') if request else None
 
     # Try to get organization from actor if not provided
     if organization is None and actor and hasattr(actor, 'organization'):

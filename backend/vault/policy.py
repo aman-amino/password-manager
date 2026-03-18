@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterable
-
+from django.utils import timezone
 from django.db.models import Q
 
 from app.models import User
@@ -19,7 +19,18 @@ def can_view_vault_item(user: User, item: VaultItem) -> PolicyDecision:
     if item.is_deleted:
         return PolicyDecision(False, "deleted")
     if item.is_personal() and item.owner_id != user.id:
+        # Check for active and unexpired access grants BEFORE denying personal access to non-owners
+        now = timezone.now()
+        if AccessGrant.objects.filter(
+            vault_item=item,
+            grantee=user,
+            is_active=True
+        ).filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gt=now)
+        ).exists():
+            return PolicyDecision(True, "access-grant")
         return PolicyDecision(False, "personal-owner-only")
+
     if item.owner_id == user.id:
         return PolicyDecision(True, "owner")
     if user.role == User.Role.SUPERADMIN:
@@ -27,9 +38,22 @@ def can_view_vault_item(user: User, item: VaultItem) -> PolicyDecision:
     if user.role == User.Role.ADMIN and item.organization_id == user.organization_id:
         return PolicyDecision(True, "admin-org")
     if user.role == User.Role.SUBADMIN and item.department_id == user.department_id:
-        return PolicyDecision(True, "subadmin-dept")
-    if AccessGrant.objects.filter(vault_item=item, grantee=user, is_active=True).exists():
+        # Subadmins can only see non-personal items in their department if the scope is DEPT
+        # (Owners and those with grants are already handled above)
+        if item.scope == VaultItem.Scope.DEPT:
+            return PolicyDecision(True, "subadmin-dept")
+
+    # General grant check for non-personal items
+    now = timezone.now()
+    if AccessGrant.objects.filter(
+        vault_item=item,
+        grantee=user,
+        is_active=True
+    ).filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=now)
+    ).exists():
         return PolicyDecision(True, "access-grant")
+
     return PolicyDecision(False, "no-access")
 
 
@@ -43,7 +67,9 @@ def can_manage_vault_item(user: User, item: VaultItem) -> PolicyDecision:
     if user.role in (User.Role.SUPERADMIN, User.Role.ADMIN) and item.organization_id == user.organization_id:
         return PolicyDecision(True, "org-admin")
     if user.role == User.Role.SUBADMIN and item.department_id == user.department_id:
-        return PolicyDecision(True, "subadmin-dept")
+        # Subadmins can only manage non-personal items in their department if the scope is DEPT
+        if item.scope == VaultItem.Scope.DEPT:
+            return PolicyDecision(True, "subadmin-dept")
     return PolicyDecision(False, "no-access")
 
 
@@ -57,15 +83,32 @@ def vault_item_queryset_for_user(user: User):
             Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user)
         )
 
-    base = VaultItem.objects.filter(is_deleted=False, organization=user.organization).exclude(
-        Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user)
-    )
+    # regular user + others
+    now = timezone.now()
+    grant_ids = AccessGrant.objects.filter(
+        grantee=user,
+        is_active=True
+    ).filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=now)
+    ).values_list("vault_item_id", flat=True)
+
+    base = VaultItem.objects.filter(is_deleted=False, organization=user.organization)
+
     if user.role == User.Role.ADMIN:
-        return base
+        # Admins see everything in org except other's personal items, PLUS grants
+        return base.exclude(
+            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user) & ~Q(id__in=grant_ids)
+        )
+
     if user.role == User.Role.SUBADMIN:
-        return base.filter(Q(department=user.department) | Q(owner=user))
+        # Subadmins see items they own, items with grants, and DEPT items in their department
+        return base.filter(
+            Q(owner=user) |
+            Q(id__in=grant_ids) |
+            (Q(department=user.department) & Q(scope=VaultItem.Scope.DEPT))
+        )
+
     # regular user
-    grant_ids = AccessGrant.objects.filter(grantee=user, is_active=True).values_list("vault_item_id", flat=True)
     return base.filter(Q(owner=user) | Q(id__in=grant_ids))
 
 

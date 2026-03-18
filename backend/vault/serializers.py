@@ -23,6 +23,13 @@ class VaultItemSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "owner", "organization", "department", "created_at", "updated_at"]
 
+    def validate_encrypted_blob(self, value):
+        # Limit encrypted blob to 1MB to prevent potential DoS/storage exhaustion
+        MAX_SIZE = 1 * 1024 * 1024  # 1MB
+        if len(value) > MAX_SIZE:
+            raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
+        return value
+
     def validate(self, attrs):
         request = self.context["request"]
         user = request.user
