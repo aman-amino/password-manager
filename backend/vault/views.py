@@ -21,10 +21,6 @@ class VaultItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return vault_item_queryset_for_user(self.request.user)
 
-    def list(self, request, *args, **kwargs):
-        log_audit_event(request, AuditEvent.Action.READ, "vault_item_list", "bulk")
-        return super().list(request, *args, **kwargs)
-
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         log_audit_event(request, AuditEvent.Action.READ, "vault_item", instance.id)

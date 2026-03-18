@@ -33,7 +33,8 @@ export async function importPassword(password) {
 }
 
 export async function deriveRootKey(passwordKey, salt, iterations) {
-  return crypto.subtle.deriveKey(
+  // Derive 256 bits (32 bytes) from PBKDF2 as the base for HKDF
+  const rootBits = await crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
       salt,
@@ -41,7 +42,14 @@ export async function deriveRootKey(passwordKey, salt, iterations) {
       hash: "SHA-256",
     },
     passwordKey,
-    { name: "HKDF", hash: "SHA-256", length: 256 },
+    256
+  );
+
+  // Import derived bits as an HKDF key
+  return crypto.subtle.importKey(
+    "raw",
+    rootBits,
+    { name: "HKDF" },
     false,
     ["deriveKey", "deriveBits"]
   );
@@ -52,7 +60,7 @@ export async function deriveSubKey(rootKey, info, usage) {
     {
       name: "HKDF",
       hash: "SHA-256",
-      salt: new Uint8Array([]),
+      salt: new Uint8Array([]), // Salt is usually optional for HKDF if root is already strong
       info: encoder.encode(info),
     },
     rootKey,

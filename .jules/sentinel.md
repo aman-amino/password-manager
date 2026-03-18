@@ -7,3 +7,8 @@
 **Vulnerability:** `rotate_admin_url` used GET instead of POST, making it vulnerable to CSRF.
 **Learning:** Any view that performs side effects (especially security-critical ones like rotating access tokens) MUST use POST and be protected by CSRF middleware.
 **Prevention:** Audit all views for HTTP method compliance. Use `@require_POST` for all state-changing operations.
+
+## 2025-05-15 - [WebCrypto Derivation Misuse]
+**Vulnerability:** Incorrect HKDF key derivation from PBKDF2 in `frontend/crypto.js`.
+**Learning:** WebCrypto `deriveKey` has specific expectations for the output key type. When chaining KDFs (PBKDF2 -> HKDF), it's often more reliable to use `deriveBits` for the intermediate secret.
+**Prevention:** Use standard, tested cryptographic libraries where possible, and always verify derivation logic against official WebCrypto examples.
