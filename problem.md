@@ -10,11 +10,12 @@
 ## 8. Insecure Default Authentication [FIXED]
 ## 9. Loose Session Cookie Policy [FIXED]
 ## 10. Missing Payload Size Limits [FIXED]
-
 ## 11. Admin Access Bypass by Non-Superadmin Staff [FIXED]
-**Description:** Staff users with a valid admin token could access the admin even if they were not superadmins.
-**Fix:** Added role-based check in AdminTokenMiddleware.
 
-## 12. Root User in Container [PENDING]
-**Description:** Backend container runs as root.
-**Priority:** Medium
+## 12. Root User in Container [FIXED]
+**Description:** Backend container was running as root.
+**Fix:** Created 'vault' user and group in Dockerfile.
+
+## 13. Superadmin Management Restriction [FIXED]
+**Description:** Superadmins were restricted from managing items outside their own organization even though they could see them.
+**Fix:** Unified management logic in policy engine.

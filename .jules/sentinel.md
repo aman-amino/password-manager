@@ -32,3 +32,8 @@
 **Vulnerability:** Relying solely on the "secret" admin URL for security allowed any staff user who obtained the URL to access the admin panel.
 **Learning:** Obscurity (secret URLs) is a valid layer of defense but must never replace standard authorization (RBAC).
 **Prevention:** Always verify the user's role/permissions even when they provide a secret token or access a hidden endpoint.
+
+## 2025-05-15 - [Container Runtime Hardening]
+**Vulnerability:** Running processes as root in a container increases the risk of container breakout and broad system compromise if a vulnerability is exploited.
+**Learning:** Always use a non-privileged user for application runtimes. Multi-stage builds or explicit user creation in the Dockerfile is a best practice.
+**Prevention:** Integrate container vulnerability scanning (e.g., Trivy, Grype) and linting (e.g., Hadolint) into the CI/CD pipeline.

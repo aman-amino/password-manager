@@ -39,7 +39,6 @@ def can_view_vault_item(user: User, item: VaultItem) -> PolicyDecision:
         return PolicyDecision(True, "admin-org")
     if user.role == User.Role.SUBADMIN and item.department_id == user.department_id:
         # Subadmins can only see non-personal items in their department if the scope is DEPT
-        # (Owners and those with grants are already handled above)
         if item.scope == VaultItem.Scope.DEPT:
             return PolicyDecision(True, "subadmin-dept")
 
@@ -64,7 +63,10 @@ def can_manage_vault_item(user: User, item: VaultItem) -> PolicyDecision:
         return PolicyDecision(False, "personal-owner-only")
     if item.owner_id == user.id:
         return PolicyDecision(True, "owner")
-    if user.role in (User.Role.SUPERADMIN, User.Role.ADMIN) and item.organization_id == user.organization_id:
+    if user.role == User.Role.SUPERADMIN:
+        # Superadmins can manage anything they can see (non-personal items globally)
+        return PolicyDecision(True, "superadmin")
+    if user.role == User.Role.ADMIN and item.organization_id == user.organization_id:
         return PolicyDecision(True, "org-admin")
     if user.role == User.Role.SUBADMIN and item.department_id == user.department_id:
         # Subadmins can only manage non-personal items in their department if the scope is DEPT
@@ -106,6 +108,8 @@ def vault_item_queryset_for_user(user: User):
             Q(owner=user) |
             Q(id__in=grant_ids) |
             (Q(department=user.department) & Q(scope=VaultItem.Scope.DEPT))
+        ).exclude(
+            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user) & ~Q(id__in=grant_ids)
         )
 
     # regular user
