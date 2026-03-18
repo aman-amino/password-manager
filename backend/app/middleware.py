@@ -1,6 +1,6 @@
 import re
 from django.http import Http404
-from .models import AdminConfig
+from .models import AdminConfig, User
 from vault.utils import log_audit_event
 from vault.models import AuditEvent
 
@@ -35,9 +35,32 @@ class AdminTokenMiddleware:
                     request,
                     action=AuditEvent.Action.ADMIN,
                     target_type="admin_access",
-                    target_id="unauthorized",
+                    target_id="unauthorized_token",
                     metadata={"path": path, "reason": "invalid_or_expired_token"}
                 )
                 raise Http404("Admin URL expired or invalid")
+
+            # Role-based restriction: Authenticated users must be Superadmins or is_superuser
+            user = request.user
+            if user.is_authenticated:
+                if not (user.role == User.Role.SUPERADMIN or user.is_superuser):
+                    log_audit_event(
+                        request,
+                        action=AuditEvent.Action.ADMIN,
+                        target_type="admin_access",
+                        target_id="denied_role",
+                        metadata={"path": path, "username": user.username, "role": user.role}
+                    )
+                    raise Http404("Admin access restricted to superadmins.")
+
+                # Log successful admin access if this is the start of the session
+                if path.endswith(f"/admin_{token}/"):
+                   log_audit_event(
+                        request,
+                        action=AuditEvent.Action.ADMIN,
+                        target_type="admin_access",
+                        target_id="successful_entry",
+                        metadata={"path": path, "username": user.username}
+                    )
 
         return self.get_response(request)

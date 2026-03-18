@@ -27,3 +27,8 @@
 **Vulnerability:** Several high-level configurations (Rate limiting, Basic Auth, Cookie SameSite, Payload limits) were missing or set to insecure defaults.
 **Learning:** Default framework settings (like DRF's Basic Auth or Django's Lax cookies) are often optimized for developer convenience rather than maximum security.
 **Prevention:** Always explicitly configure security-sensitive headers and framework features (throttling, auth backends, payload validation) to match the project's specific threat model.
+
+## 2025-05-15 - [Defense in Depth: Admin URL vs RBAC]
+**Vulnerability:** Relying solely on the "secret" admin URL for security allowed any staff user who obtained the URL to access the admin panel.
+**Learning:** Obscurity (secret URLs) is a valid layer of defense but must never replace standard authorization (RBAC).
+**Prevention:** Always verify the user's role/permissions even when they provide a secret token or access a hidden endpoint.
