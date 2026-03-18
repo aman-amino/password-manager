@@ -17,3 +17,8 @@
 **Vulnerability:** Access grants were checked for activity status but not for expiration time in `vault/policy.py`.
 **Learning:** Time-based access control must explicitly check current system time against expiration fields in all authorization paths (both individual object checks and queryset filtering).
 **Prevention:** Implement a central helper for checking grant validity that includes both active status and temporal constraints.
+
+## 2025-05-15 - [Privilege Escalation in Hierarchical RBAC]
+**Vulnerability:** Subadmins could access organization-wide items if those items happened to be associated with their department.
+**Learning:** Hierarchical roles must be strictly scoped. Just because a user has a "management" role within a sub-unit (department), it doesn't mean they should manage items whose scope belongs to the parent unit (organization).
+**Prevention:** Always verify that both the user's scope (department) AND the item's intended scope (DEPT vs ORG) match before granting access based on a sub-administrative role.

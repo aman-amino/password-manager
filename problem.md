@@ -18,8 +18,8 @@
 
 ## 5. Ineffective AccessGrant Expiration [FIXED]
 **Description:** The policy engine checked if an `AccessGrant` was active but ignored the `expires_at` field.
-**Fix:** Updated `can_view_vault_item` and `vault_item_queryset_for_user` to check `expires_at` against `timezone.now()`.
+**Fix:** Updated policy to check `expires_at` against `timezone.now()`.
 
-## 6. Subadmin Management Escalation [PENDING]
-**Description:** `SUBADMIN` users can manage any non-personal item that has their `department_id` set, regardless of whether the scope is `DEPT` or `ORG`.
-**Priority:** Medium
+## 6. Subadmin Management Escalation [FIXED]
+**Description:** `SUBADMIN` users could manage any non-personal item that had their `department_id` set, even if the scope was `ORG`.
+**Fix:** Restricted subadmin management and visibility to only `DEPT` scoped items in their department, unless granted explicitly.

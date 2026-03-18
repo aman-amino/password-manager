@@ -208,3 +208,48 @@ class AccessGrantExpirationTests(APITestCase):
         response_list = self.client.get(url_list, follow=True)
         ids = [item["id"] for item in response_list.data]
         self.assertNotIn(self.item.id, ids)
+
+class SubadminEscalationTests(APITestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name="Sub Org", slug="sub-org")
+        self.dept = Department.objects.create(organization=self.org, name="Sub Dept", slug="sub-dept")
+        self.admin = User.objects.create_user(
+            username="orgadmin", password="password", role=User.Role.ADMIN, organization=self.org
+        )
+        self.subadmin = User.objects.create_user(
+            username="subadmin", password="password", role=User.Role.SUBADMIN,
+            organization=self.org, department=self.dept
+        )
+        self.org_item = VaultItem.objects.create(
+            owner=self.admin, organization=self.org, department=self.dept,
+            scope=VaultItem.Scope.ORG, title="Org Wide Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+        self.dept_item = VaultItem.objects.create(
+            owner=self.admin, organization=self.org, department=self.dept,
+            scope=VaultItem.Scope.DEPT, title="Dept Only Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+
+    def test_subadmin_sees_dept_item(self):
+        """Subadmin should see DEPT scoped items in their department."""
+        self.client.force_authenticate(user=self.subadmin)
+        url = reverse("vault-item-list")
+        response = self.client.get(url, follow=True)
+        ids = [item["id"] for item in response.data]
+        self.assertIn(self.dept_item.id, ids)
+
+    def test_subadmin_cannot_see_org_item(self):
+        """Subadmin should NOT see ORG scoped items in their department unless granted."""
+        self.client.force_authenticate(user=self.subadmin)
+        url = reverse("vault-item-list")
+        response = self.client.get(url, follow=True)
+        ids = [item["id"] for item in response.data]
+        self.assertNotIn(self.org_item.id, ids)
+
+    def test_subadmin_cannot_manage_org_item(self):
+        """Subadmin should NOT be able to update ORG scoped items in their department."""
+        self.client.force_authenticate(user=self.subadmin)
+        url = reverse("vault-item-detail", args=[self.org_item.id])
+        response = self.client.patch(url, {"title": "Compromised"})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
