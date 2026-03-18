@@ -22,3 +22,8 @@
 **Vulnerability:** Subadmins could access organization-wide items if those items happened to be associated with their department.
 **Learning:** Hierarchical roles must be strictly scoped. Just because a user has a "management" role within a sub-unit (department), it doesn't mean they should manage items whose scope belongs to the parent unit (organization).
 **Prevention:** Always verify that both the user's scope (department) AND the item's intended scope (DEPT vs ORG) match before granting access based on a sub-administrative role.
+
+## 2025-05-15 - [API Surface Hardening]
+**Vulnerability:** Several high-level configurations (Rate limiting, Basic Auth, Cookie SameSite, Payload limits) were missing or set to insecure defaults.
+**Learning:** Default framework settings (like DRF's Basic Auth or Django's Lax cookies) are often optimized for developer convenience rather than maximum security.
+**Prevention:** Always explicitly configure security-sensitive headers and framework features (throttling, auth backends, payload validation) to match the project's specific threat model.
