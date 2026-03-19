@@ -336,3 +336,39 @@ class PasswordPolicyTests(TestCase):
             validate_password(strong)
         except ValidationError:
             self.fail("Strong password failed validation!")
+
+class MFAEnforcementTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="mfauser", password="StrongPass123!", mfa_enabled=True
+        )
+
+    def test_mfa_enabled_user_denied_without_verification(self):
+        """User with MFA enabled should be denied access if mfa_verified is not in session."""
+        self.client.force_login(user=self.user)
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {"error": "MFA verification required"})
+
+    def test_mfa_enabled_user_allowed_after_verification(self):
+        """User with MFA enabled should be allowed if mfa_verified is in session."""
+        self.client.force_login(user=self.user)
+        # Manually inject session data
+        session = self.client.session
+        session['mfa_verified'] = True
+        session.save()
+
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_mfa_disabled_user_always_allowed(self):
+        """User with MFA disabled should not be affected by the middleware."""
+        user_no_mfa = User.objects.create_user(
+            username="nomfa", password="StrongPass123!", mfa_enabled=False
+        )
+        self.client.force_login(user=user_no_mfa)
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

@@ -41,6 +41,7 @@ MIDDLEWARE = [
     "axes.middleware.AxesMiddleware",
     "csp.middleware.CSPMiddleware",
     "app.middleware.AdminTokenMiddleware",
+    "app.middleware.MFAEnforcementMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

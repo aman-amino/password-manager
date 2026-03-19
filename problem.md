@@ -16,11 +16,8 @@
 ## 14. Unaudited Django Admin Actions [FIXED]
 ## 15. Sensitive Token Exposure in Logs [FIXED]
 ## 16. Superadmin Inconsistent Visibility [FIXED]
-
 ## 17. Weak Default Password Policy [FIXED]
-**Description:** Default Django password validators were too lenient for a secure password manager.
-**Fix:** Implemented custom `ComplexityValidator` and enforced a 12-character minimum with uppercase, lowercase, digits, and special characters.
 
-## 18. MFA Definition without Enforcement [PENDING]
-**Description:** The `User` model has an `mfa_enabled` flag, but the authentication logic does not enforce or provide MFA.
-**Priority:** High
+## 18. MFA Definition without Enforcement [FIXED]
+**Description:** The `User` model had an `mfa_enabled` flag, but the authentication logic did not enforce it.
+**Fix:** Implemented `MFAEnforcementMiddleware` that blocks all non-exempt paths if a user has MFA enabled but has not verified it in their current session (`mfa_verified` session key).

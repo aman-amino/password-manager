@@ -52,3 +52,8 @@
 **Vulnerability:** Default password policies were insufficient for a high-security vault.
 **Learning:** For password managers, the "master password" (or user password) is the most critical secret. It must be hardened beyond standard web application requirements.
 **Prevention:** Enforce strong complexity requirements (length, character variety) and consider integrating password breached databases (e.g., Have I Been Pwned) into the validation flow.
+
+## 2025-05-15 - [MFA Verification Bypass]
+**Vulnerability:** Having an "MFA enabled" flag on the user model without corresponding enforcement in the application logic is a critical security gap. It creates a false sense of security.
+**Learning:** Security features like MFA must be implemented as high-level "gates" (e.g., middleware) that cover the entire application surface.
+**Prevention:** If a user model contains state-based security flags (e.g., `mfa_enabled`, `password_expired`, `account_locked`), there must be corresponding logic in the request lifecycle (middleware or base view) to enforce the consequences of those flags.

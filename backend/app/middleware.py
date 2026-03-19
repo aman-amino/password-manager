@@ -1,5 +1,6 @@
 import re
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.shortcuts import redirect
 from .models import AdminConfig, User
 from vault.utils import log_audit_event
 from vault.models import AuditEvent
@@ -65,5 +66,31 @@ class AdminTokenMiddleware:
                         target_id="successful_entry",
                         metadata={"path": redacted_path, "username": user.username}
                     )
+
+        return self.get_response(request)
+
+class MFAEnforcementMiddleware:
+    """
+    Enforces MFA if enabled for the user.
+    Blocks API access and redirects other requests if mfa_verified is not in session.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'mfa_enabled', False):
+            # Session verification: If MFA is enabled but NOT verified in the session, block access
+            if not request.session.get('mfa_verified', False):
+                # Paths that are exempt from MFA enforcement (health, static, auth-related)
+                # In a real app, the MFA verification page itself would be exempt
+                exempt_prefixes = ['/status/', '/health/', '/static/', '/favicon.ico']
+                path = request.path
+                if not any(path.startswith(p) for p in exempt_prefixes):
+                    if path.startswith('/api/'):
+                        return JsonResponse({"error": "MFA verification required"}, status=403)
+                    # For non-API requests, we would ideally redirect to a verification page.
+                    # Since we don't have one yet, we'll return a 403.
+                    return JsonResponse({"error": "MFA verification required to access this resource."}, status=403)
 
         return self.get_response(request)
