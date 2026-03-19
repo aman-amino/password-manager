@@ -17,6 +17,9 @@ class AdminTokenMiddleware:
 
         if match:
             token = match.group(1)
+            # Redact token from path for logging purposes
+            redacted_path = path.replace(token, "[REDACTED]")
+
             # Bypass check ONLY if NO active tokens exist yet (initial setup)
             if not AdminConfig.objects.filter(is_active=True).exists():
                 # Still log that we are in initial setup mode
@@ -25,7 +28,7 @@ class AdminTokenMiddleware:
                     action=AuditEvent.Action.ADMIN,
                     target_type="admin_setup",
                     target_id="initial_bypass",
-                    metadata={"path": path, "reason": "no_active_tokens"}
+                    metadata={"path": redacted_path, "reason": "no_active_tokens"}
                 )
                 return self.get_response(request)
 
@@ -36,7 +39,7 @@ class AdminTokenMiddleware:
                     action=AuditEvent.Action.ADMIN,
                     target_type="admin_access",
                     target_id="unauthorized_token",
-                    metadata={"path": path, "reason": "invalid_or_expired_token"}
+                    metadata={"path": redacted_path, "reason": "invalid_or_expired_token"}
                 )
                 raise Http404("Admin URL expired or invalid")
 
@@ -49,7 +52,7 @@ class AdminTokenMiddleware:
                         action=AuditEvent.Action.ADMIN,
                         target_type="admin_access",
                         target_id="denied_role",
-                        metadata={"path": path, "username": user.username, "role": user.role}
+                        metadata={"path": redacted_path, "username": user.username, "role": user.role}
                     )
                     raise Http404("Admin access restricted to superadmins.")
 
@@ -60,7 +63,7 @@ class AdminTokenMiddleware:
                         action=AuditEvent.Action.ADMIN,
                         target_type="admin_access",
                         target_id="successful_entry",
-                        metadata={"path": path, "username": user.username}
+                        metadata={"path": redacted_path, "username": user.username}
                     )
 
         return self.get_response(request)

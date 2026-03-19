@@ -264,3 +264,50 @@ class AdminRoleRestrictionTests(APITestCase):
         self.client.force_login(user=self.staff_user)
         response = self.client.get(f"/admin_{self.token}/")
         self.assertEqual(response.status_code, 404)
+
+class SuperadminPersonalGrantTests(APITestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name="Super Org", slug="super-org")
+        self.superadmin = User.objects.create_user(
+            username="superadmin_grant", password="password", role=User.Role.SUPERADMIN
+        )
+        self.user = User.objects.create_user(
+            username="user_owner", password="password", role=User.Role.USER, organization=self.org
+        )
+        self.personal_item = VaultItem.objects.create(
+            owner=self.user, organization=self.org,
+            scope=VaultItem.Scope.PERSONAL, title="Super Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+
+    def test_superadmin_list_sees_granted_personal_item(self):
+        """Superadmin should see a personal item in list view IF granted access."""
+        # Before grant, should NOT see
+        self.client.force_authenticate(user=self.superadmin)
+        url = reverse("vault-item-list")
+        response = self.client.get(url, follow=True)
+        ids = [item["id"] for item in response.data]
+        self.assertNotIn(self.personal_item.id, ids)
+
+        # After grant, SHOULD see
+        AccessGrant.objects.create(
+            vault_item=self.personal_item, grantee=self.superadmin,
+            granted_by=self.user, is_active=True
+        )
+        response = self.client.get(url, follow=True)
+        ids = [item["id"] for item in response.data]
+        self.assertIn(self.personal_item.id, ids)
+
+class AuditLogRedactionTests(APITestCase):
+    def test_admin_token_redaction_in_logs(self):
+        """Secret admin tokens should be redacted in audit log metadata."""
+        token = "secret-token-123"
+        AdminConfig.objects.create(admin_token=token, is_active=True)
+
+        # Access with invalid token (trigger middleware log)
+        self.client.get("/admin_wrong-token/")
+
+        # Verify log entry exists and is redacted
+        log = AuditEvent.objects.filter(target_id="unauthorized_token").latest('created_at')
+        self.assertIn("[REDACTED]", log.metadata["path"])
+        self.assertNotIn("wrong-token", log.metadata["path"])

@@ -79,12 +79,6 @@ def vault_item_queryset_for_user(user: User):
     if not user.is_authenticated:
         return VaultItem.objects.none()
 
-    if user.role == User.Role.SUPERADMIN:
-        # Superadmins see everything except other people's personal items
-        return VaultItem.objects.filter(is_deleted=False).exclude(
-            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user)
-        )
-
     # regular user + others
     now = timezone.now()
     grant_ids = AccessGrant.objects.filter(
@@ -93,6 +87,13 @@ def vault_item_queryset_for_user(user: User):
     ).filter(
         Q(expires_at__isnull=True) | Q(expires_at__gt=now)
     ).values_list("vault_item_id", flat=True)
+
+    if user.role == User.Role.SUPERADMIN:
+        # Superadmins see everything except other people's personal items,
+        # UNLESS they have been explicitly granted access to those personal items.
+        return VaultItem.objects.filter(is_deleted=False).exclude(
+            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user) & ~Q(id__in=grant_ids)
+        )
 
     base = VaultItem.objects.filter(is_deleted=False, organization=user.organization)
 

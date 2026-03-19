@@ -42,3 +42,8 @@
 **Vulnerability:** While API actions were audited, direct manual changes in the Django admin interface were not captured in the system's own audit log.
 **Learning:** For a high-security application, the "admin panel" is a major attack surface. Any change to system state (users, organizations, keys) via the admin must be just as visible as changes via the API.
 **Prevention:** Use a common mixin or base class for all Admin models that hooks into `log_addition`, `log_change`, and `log_deletion`. Additionally, consider making Audit Logs themselves immutable/read-only in the UI.
+
+## 2025-05-15 - [Sensitive Data Leakage in Audit Trails]
+**Vulnerability:** Secret tokens (like the hidden admin URL) were accidentally logged as part of the request path in `AuditEvent` metadata.
+**Learning:** Audit trails are themselves a form of sensitive data. Redact credentials, tokens, and PII from log metadata before persistent storage.
+**Prevention:** Implement a central redaction utility or middleware to strip sensitive patterns (e.g., `/admin_[\w-]+\/`) from all logged paths and URLs.
