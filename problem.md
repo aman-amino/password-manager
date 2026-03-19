@@ -17,7 +17,12 @@
 ## 15. Sensitive Token Exposure in Logs [FIXED]
 ## 16. Superadmin Inconsistent Visibility [FIXED]
 ## 17. Weak Default Password Policy [FIXED]
-
 ## 18. MFA Definition without Enforcement [FIXED]
-**Description:** The `User` model had an `mfa_enabled` flag, but the authentication logic did not enforce it.
-**Fix:** Implemented `MFAEnforcementMiddleware` that blocks all non-exempt paths if a user has MFA enabled but has not verified it in their current session (`mfa_verified` session key).
+
+## 19. Missing Logout Audit Logging [FIXED]
+**Description:** User logouts were not being captured in the audit trail.
+**Fix:** Added a signal receiver for `user_logged_out` in `vault/signals.py`.
+
+## 20. Excessive Session Lifetime [FIXED]
+**Description:** Default Django session age (2 weeks) was too long for a sensitive application.
+**Fix:** Reduced `SESSION_COOKIE_AGE` to 1 hour and enabled `SESSION_EXPIRE_AT_BROWSER_CLOSE`.

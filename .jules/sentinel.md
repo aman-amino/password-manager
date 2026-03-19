@@ -57,3 +57,8 @@
 **Vulnerability:** Having an "MFA enabled" flag on the user model without corresponding enforcement in the application logic is a critical security gap. It creates a false sense of security.
 **Learning:** Security features like MFA must be implemented as high-level "gates" (e.g., middleware) that cover the entire application surface.
 **Prevention:** If a user model contains state-based security flags (e.g., `mfa_enabled`, `password_expired`, `account_locked`), there must be corresponding logic in the request lifecycle (middleware or base view) to enforce the consequences of those flags.
+
+## 2025-05-15 - [Session Lifecycle Management]
+**Vulnerability:** Excessively long session lifetimes and lack of logout auditing increase the window of opportunity for attackers who gain access to an authenticated device.
+**Learning:** For high-security applications, the session lifecycle should be as short as practical. Logout auditing is essential for verifying when an active session was intentionally terminated.
+**Prevention:** Enforce short session timeouts (e.g., 15-60 minutes) and use `SESSION_EXPIRE_AT_BROWSER_CLOSE` to ensure sessions don't persist in shared environments.
