@@ -37,3 +37,8 @@
 **Vulnerability:** Running processes as root in a container increases the risk of container breakout and broad system compromise if a vulnerability is exploited.
 **Learning:** Always use a non-privileged user for application runtimes. Multi-stage builds or explicit user creation in the Dockerfile is a best practice.
 **Prevention:** Integrate container vulnerability scanning (e.g., Trivy, Grype) and linting (e.g., Hadolint) into the CI/CD pipeline.
+
+## 2025-05-15 - [Visibility Gap: Administrative Backdoor]
+**Vulnerability:** While API actions were audited, direct manual changes in the Django admin interface were not captured in the system's own audit log.
+**Learning:** For a high-security application, the "admin panel" is a major attack surface. Any change to system state (users, organizations, keys) via the admin must be just as visible as changes via the API.
+**Prevention:** Use a common mixin or base class for all Admin models that hooks into `log_addition`, `log_change`, and `log_deletion`. Additionally, consider making Audit Logs themselves immutable/read-only in the UI.

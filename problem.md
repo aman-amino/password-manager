@@ -11,11 +11,9 @@
 ## 9. Loose Session Cookie Policy [FIXED]
 ## 10. Missing Payload Size Limits [FIXED]
 ## 11. Admin Access Bypass by Non-Superadmin Staff [FIXED]
-
 ## 12. Root User in Container [FIXED]
-**Description:** Backend container was running as root.
-**Fix:** Created 'vault' user and group in Dockerfile.
-
 ## 13. Superadmin Management Restriction [FIXED]
-**Description:** Superadmins were restricted from managing items outside their own organization even though they could see them.
-**Fix:** Unified management logic in policy engine.
+
+## 14. Unaudited Django Admin Actions [FIXED]
+**Description:** Actions performed directly in the Django admin (creation, modification, deletion of users, organizations, etc.) were not logged in the application's AuditEvent table.
+**Fix:** Implemented `AuditLoggingMixin` in `vault/admin.py` and `app/admin.py` to capture all admin actions.
