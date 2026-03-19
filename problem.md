@@ -14,19 +14,13 @@
 ## 12. Root User in Container [FIXED]
 ## 13. Superadmin Management Restriction [FIXED]
 ## 14. Unaudited Django Admin Actions [FIXED]
-
 ## 15. Sensitive Token Exposure in Logs [FIXED]
-**Description:** The secret admin token was being logged in the `AuditEvent` metadata path field.
-**Fix:** Implemented token redaction in `AdminTokenMiddleware`.
-
 ## 16. Superadmin Inconsistent Visibility [FIXED]
-**Description:** Superadmins were unable to see other users' personal items in the list view even when granted explicit access.
-**Fix:** Updated queryset filtering for superadmins.
 
-## 17. MFA Definition without Enforcement [PENDING]
+## 17. Weak Default Password Policy [FIXED]
+**Description:** Default Django password validators were too lenient for a secure password manager.
+**Fix:** Implemented custom `ComplexityValidator` and enforced a 12-character minimum with uppercase, lowercase, digits, and special characters.
+
+## 18. MFA Definition without Enforcement [PENDING]
 **Description:** The `User` model has an `mfa_enabled` flag, but the authentication logic does not enforce or provide MFA.
 **Priority:** High
-
-## 18. Weak Default Password Policy [PENDING]
-**Description:** Default Django validators may be too lenient for a secure vault.
-**Priority:** Medium

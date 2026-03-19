@@ -47,3 +47,8 @@
 **Vulnerability:** Secret tokens (like the hidden admin URL) were accidentally logged as part of the request path in `AuditEvent` metadata.
 **Learning:** Audit trails are themselves a form of sensitive data. Redact credentials, tokens, and PII from log metadata before persistent storage.
 **Prevention:** Implement a central redaction utility or middleware to strip sensitive patterns (e.g., `/admin_[\w-]+\/`) from all logged paths and URLs.
+
+## 2025-05-15 - [Insufficient Credential Hardening]
+**Vulnerability:** Default password policies were insufficient for a high-security vault.
+**Learning:** For password managers, the "master password" (or user password) is the most critical secret. It must be hardened beyond standard web application requirements.
+**Prevention:** Enforce strong complexity requirements (length, character variety) and consider integrating password breached databases (e.g., Have I Been Pwned) into the validation flow.

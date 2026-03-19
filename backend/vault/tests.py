@@ -311,3 +311,28 @@ class AuditLogRedactionTests(APITestCase):
         log = AuditEvent.objects.filter(target_id="unauthorized_token").latest('created_at')
         self.assertIn("[REDACTED]", log.metadata["path"])
         self.assertNotIn("wrong-token", log.metadata["path"])
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+
+class PasswordPolicyTests(TestCase):
+    def test_weak_passwords_fail(self):
+        """Weak passwords should fail complexity validation."""
+        weak_passwords = [
+            "short1!",       # too short
+            "alllowercase1!", # no uppercase
+            "ALLUPPERCASE1!", # no lowercase
+            "NoDigitSpecial", # no digit, no special
+            "NoSpecial1",     # no special
+        ]
+        for password in weak_passwords:
+            with self.subTest(password=password):
+                with self.assertRaises(ValidationError):
+                    validate_password(password)
+
+    def test_strong_password_passes(self):
+        """A strong password meeting all criteria should pass."""
+        strong = "StrongPass123!"
+        try:
+            validate_password(strong)
+        except ValidationError:
+            self.fail("Strong password failed validation!")
