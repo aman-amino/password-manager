@@ -129,3 +129,10 @@
 ## Environment Notes
 - Updated django-csp settings to new `CONTENT_SECURITY_POLICY` format.
 - Added Axes authentication backend and removed deprecated settings.
+
+## Performance, Security, and UI Modernization (Step 11)
+- Performance: Optimized `VaultItemViewSet` queries using `select_related` and `prefetch_related`.
+- Security (MFA): Added `totp_secret` and `last_mfa_login` to User model. Implemented `verify_mfa` view.
+- Audit Logging: Expanded signals to log logout and failed login attempts.
+- Modern UI: Integrated high-fidelity dark-mode design inspired by ChatGPT/Vercel with Geist/JetBrains Mono typography.
+- Verification: Passed all existing backend tests and verified UI layout with Playwright screenshots.

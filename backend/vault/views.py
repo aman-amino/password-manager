@@ -21,7 +21,7 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user)
+        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department").prefetch_related("tag_links__tag")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
