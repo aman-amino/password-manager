@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import VaultItem
+from .policy import can_create_vault_item
 
 
 class VaultItemSerializer(serializers.ModelSerializer):
@@ -34,8 +35,11 @@ class VaultItemSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         user = request.user
         scope = attrs.get("scope") or getattr(self.instance, "scope", None)
-        if scope == VaultItem.Scope.PERSONAL and user is not None:
-            return attrs
+
+        decision = can_create_vault_item(user, scope)
+        if not decision.allowed:
+            raise serializers.ValidationError(f"Permission denied for scope '{scope}': {decision.reason}")
+
         if scope == VaultItem.Scope.ORG and user.organization_id is None:
             raise serializers.ValidationError("Organization scope requires user organization.")
         if scope == VaultItem.Scope.DEPT and user.department_id is None:

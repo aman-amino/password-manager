@@ -57,6 +57,26 @@ def can_view_vault_item(user: User, item: VaultItem) -> PolicyDecision:
     return PolicyDecision(False, "no-access")
 
 
+def can_create_vault_item(user: User, scope: str) -> PolicyDecision:
+    if not user.is_authenticated:
+        return PolicyDecision(False, "unauthenticated")
+
+    if scope == VaultItem.Scope.PERSONAL:
+        return PolicyDecision(True, "allowed")
+
+    if scope == VaultItem.Scope.DEPT:
+        if user.role in (User.Role.SUPERADMIN, User.Role.ADMIN, User.Role.SUBADMIN):
+            return PolicyDecision(True, "allowed")
+        return PolicyDecision(False, "insufficient-role-for-dept-scope")
+
+    if scope == VaultItem.Scope.ORG:
+        if user.role in (User.Role.SUPERADMIN, User.Role.ADMIN):
+            return PolicyDecision(True, "allowed")
+        return PolicyDecision(False, "insufficient-role-for-org-scope")
+
+    return PolicyDecision(False, "invalid-scope")
+
+
 def can_manage_vault_item(user: User, item: VaultItem) -> PolicyDecision:
     if not user.is_authenticated:
         return PolicyDecision(False, "unauthenticated")

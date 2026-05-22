@@ -3,7 +3,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from .models import AuditEvent, VaultItem
-from .permissions import CanViewVaultItem, CanManageVaultItem
+from .permissions import CanViewVaultItem, CanManageVaultItem, CanCreateVaultItem
 from .policy import can_manage_vault_item, vault_item_queryset_for_user
 from .serializers import VaultItemSerializer
 from .utils import log_audit_event
@@ -11,11 +11,11 @@ from .utils import log_audit_event
 
 class VaultItemViewSet(viewsets.ModelViewSet):
     serializer_class = VaultItemSerializer
-    permission_classes = [IsAuthenticated, CanViewVaultItem]
+    permission_classes = [IsAuthenticated, CanViewVaultItem, CanCreateVaultItem]
 
     def get_permissions(self):
         if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), CanManageVaultItem()]
+            return [IsAuthenticated(), CanManageVaultItem(), CanCreateVaultItem()]
         return super().get_permissions()
 
     def get_queryset(self):
