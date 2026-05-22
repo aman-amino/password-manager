@@ -14,12 +14,14 @@ class VaultItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, CanViewVaultItem, CanCreateVaultItem]
 
     def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated(), CanCreateVaultItem()]
         if self.action in ("update", "partial_update", "destroy"):
             return [IsAuthenticated(), CanManageVaultItem(), CanCreateVaultItem()]
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user)
+        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department").prefetch_related("tag_links__tag")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -50,7 +50,11 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER)
     organization = models.ForeignKey(Organization, null=True, blank=True, on_delete=models.SET_NULL, related_name="users")
     department = models.ForeignKey(Department, null=True, blank=True, on_delete=models.SET_NULL, related_name="users")
+
+    # MFA Fields
     mfa_enabled = models.BooleanField(default=False)
+    totp_secret = models.CharField(max_length=32, null=True, blank=True)  # Store encrypted or obfuscated in prod
+    last_mfa_login = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:
         return self.username

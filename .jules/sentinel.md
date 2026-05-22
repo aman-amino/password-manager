@@ -32,3 +32,8 @@
 **Vulnerability:** Relying solely on the "secret" admin URL for security allowed any staff user who obtained the URL to access the admin panel.
 **Learning:** Obscurity (secret URLs) is a valid layer of defense but must never replace standard authorization (RBAC).
 **Prevention:** Always verify the user's role/permissions even when they provide a secret token or access a hidden endpoint.
+
+## 2026-02-09 - [Scope Escalation in Resource Creation]
+**Vulnerability:** Resource creation (VaultItem) lacked role-based scope validation, allowing regular users to create items in ORG/DEPT scopes despite being unable to view them.
+**Learning:** Object-level permissions and queryset filtering do not implicitly protect the `create` path. Input fields that dictate resource visibility or ownership must be validated against the actor's role.
+**Prevention:** Use DRF `has_permission` or serializer validation to strictly enforce role-based constraints on "owner" or "scope" fields during creation.

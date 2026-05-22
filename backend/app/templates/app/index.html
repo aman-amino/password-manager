@@ -1,163 +1,160 @@
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vault Workspace</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortress | Zero-Knowledge Vault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    >
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    >
-    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'app/styles.css' %}">
-  </head>
-  <body>
+</head>
+<body class="dark-mode">
     {% csrf_token %}
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-icon">V</div>
-          <div>
-            <div class="brand-title">Vault</div>
-            <div class="brand-sub">Zero-knowledge ops</div>
-          </div>
-        </div>
-        <nav class="nav flex-column gap-2">
-          <button class="nav-link active" data-view="vault">Vault</button>
-          <button class="nav-link" data-view="sharing">Sharing</button>
-          <button class="nav-link" data-view="people">People</button>
-          <button class="nav-link" data-view="audit">Audit</button>
-          <button class="nav-link" data-view="settings">Settings</button>
-        </nav>
-        <div class="sidebar-footer">
-          <div class="small text-muted">Signed in</div>
-          <div class="fw-semibold">superadmin@vault</div>
-          <button class="btn btn-outline-light btn-sm mt-3">Open Admin</button>
-        </div>
-      </aside>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">F</div>
+                    <span class="brand-title">FORTRESS</span>
+                </div>
+            </div>
 
-      <main class="content">
-        <header class="content-header">
-          <div>
-            <h1 class="h3 mb-1">Secure Workspace</h1>
-            <div class="text-muted">Encrypted secrets and policy-driven access.</div>
-          </div>
-          <div class="d-flex gap-2">
-            <button class="btn btn-outline-light">Import</button>
-            <button class="btn btn-primary">New Secret</button>
-          </div>
-        </header>
+            <nav class="sidebar-nav">
+                <button class="nav-link active" data-view="vault">
+                    <span class="icon">vault</span> Vault
+                </button>
+                <button class="nav-link" data-view="shared">
+                    <span class="icon">share</span> Shared
+                </button>
+                <button class="nav-link" data-view="people">
+                    <span class="icon">group</span> People
+                </button>
+                <button class="nav-link" data-view="audit">
+                    <span class="icon">analytics</span> Audit Logs
+                </button>
+                <button class="nav-link" data-view="settings">
+                    <span class="icon">settings</span> Settings
+                </button>
+            </nav>
 
-        <section class="panel spotlight">
-          <div class="spotlight-content">
-            <h2 class="h4">Policy Console</h2>
-            <p class="text-muted mb-0">
-              Instant visibility into org, dept, and personal scopes with zero-knowledge guarantees.
-            </p>
-          </div>
-          <div class="spotlight-actions">
-            <button class="btn btn-outline-light">Rotate Scope Keys</button>
-            <button class="btn btn-success">Review Access</button>
-          </div>
-        </section>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-meta">
+                        <div class="fw-semibold" id="currentUser">superadmin@vault</div>
+                        <div class="small text-muted" id="userRole">Superadmin</div>
+                    </div>
+                </div>
+                <button id="rotateAdminBtn" class="btn btn-outline-secondary btn-sm w-100 mt-3">Rotate Admin URL</button>
+            </div>
+        </aside>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div class="search">
-              <input class="form-control" placeholder="Search secrets, tags, users">
-            </div>
-            <div class="filters">
-              <button class="btn btn-sm btn-outline-secondary">All</button>
-              <button class="btn btn-sm btn-outline-secondary">Personal</button>
-              <button class="btn btn-sm btn-outline-secondary">Dept</button>
-              <button class="btn btn-sm btn-outline-secondary">Org</button>
-            </div>
-          </div>
-          <div class="panel-body">
-            <div class="vault-grid">
-              <div class="vault-card">
-                <div class="card-title">Prod Admin</div>
-                <div class="card-meta">Org · Updated 2h ago</div>
-                <div class="card-tags">
-                  <span class="tag">critical</span>
-                  <span class="tag">infra</span>
+        <main class="content-area">
+            <header class="content-header">
+                <div class="header-left">
+                    <h1 class="h3" id="viewTitle">Vault</h1>
+                    <div class="status-chips">
+                        <span class="badge bg-teal-subtle text-teal">Zero-Knowledge Active</span>
+                        <span class="badge bg-secondary-subtle" id="itemCount">0 Secrets</span>
+                    </div>
                 </div>
-              </div>
-              <div class="vault-card">
-                <div class="card-title">HR Payroll</div>
-                <div class="card-meta">Dept · Updated 1d ago</div>
-                <div class="card-tags">
-                  <span class="tag">dept</span>
+                <div class="header-right">
+                    <button class="btn btn-primary" id="newSecretBtn">+ New Secret</button>
                 </div>
-              </div>
-              <div class="vault-card">
-                <div class="card-title">Personal MFA</div>
-                <div class="card-meta">Personal · Updated 3d ago</div>
-                <div class="card-tags">
-                  <span class="tag">personal</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </header>
 
-        <section class="panel split">
-          <div class="panel-body">
-            <h2 class="h5">Secret Details</h2>
-            <div class="detail-row">
-              <div class="text-muted">Owner</div>
-              <div>superadmin@vault</div>
-            </div>
-            <div class="detail-row">
-              <div class="text-muted">Scope</div>
-              <div>Organization</div>
-            </div>
-            <div class="detail-row">
-              <div class="text-muted">Sharing</div>
-              <div>3 recipients</div>
-            </div>
-            <div class="detail-row">
-              <div class="text-muted">Last Access</div>
-              <div>Today 09:12</div>
-            </div>
-            <button class="btn btn-outline-light mt-3">Rotate Key</button>
-          </div>
-          <div class="panel-body">
-            <h2 class="h5">Access Requests</h2>
-            <ul class="list-unstyled">
-              <li class="request">
-                <div>
-                  <div class="fw-semibold">alex@vault</div>
-                  <div class="text-muted small">Dept access · 2h ago</div>
+            <section class="controls-panel" id="vaultControls">
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="Search secrets, tags, metadata...">
                 </div>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-sm btn-outline-success">Approve</button>
-                  <button class="btn btn-sm btn-outline-danger">Deny</button>
+                <div class="filter-chips">
+                    <button class="filter-chip active">All</button>
+                    <button class="filter-chip">Personal</button>
+                    <button class="filter-chip">Department</button>
+                    <button class="filter-chip">Organization</button>
                 </div>
-              </li>
-              <li class="request">
-                <div>
-                  <div class="fw-semibold">sam@vault</div>
-                  <div class="text-muted small">Org access · 1d ago</div>
+            </section>
+
+            <section class="main-content">
+                <!-- Vault View -->
+                <div id="vaultView" class="view-pane">
+                    <div class="vault-grid" id="vaultGrid">
+                        <!-- Cards will be injected by JS -->
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-sm btn-outline-success">Approve</button>
-                  <button class="btn btn-sm btn-outline-danger">Deny</button>
+
+                <!-- Shared View -->
+                <div id="sharedView" class="view-pane d-none">
+                    <div class="section-group">
+                        <h2 class="h5 mb-4">Access Requests</h2>
+                        <div id="requestList" class="request-list">
+                            <div class="request-card">
+                                <div class="request-info">
+                                    <div class="fw-medium">alex@vault</div>
+                                    <div class="text-muted small">Requested access to "Prod Admin" • 2h ago</div>
+                                </div>
+                                <div class="request-actions">
+                                    <button class="btn btn-sm btn-outline-success">Approve</button>
+                                    <button class="btn btn-sm btn-outline-danger">Deny</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </li>
-            </ul>
-          </div>
-        </section>
-      </main>
+
+                <!-- Other views placeholders -->
+                <div id="auditView" class="view-pane d-none">
+                     <h2 class="h5 mb-4">Security Audit Log</h2>
+                     <div class="audit-table-container">
+                        <table class="table table-dark table-hover small">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Actor</th>
+                                    <th>Action</th>
+                                    <th>Target</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogBody">
+                                <!-- Logs will be injected -->
+                            </tbody>
+                        </table>
+                     </div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="detail-pane" id="detailPane">
+            <div class="pane-header">
+                <h2 class="h5 mb-0">Secret Details</h2>
+                <button class="btn-close" id="closePaneBtn"></button>
+            </div>
+            <div class="pane-body">
+                <div class="detail-section">
+                    <label class="label-sm">METADATA</label>
+                    <div class="metadata-grid">
+                        <div class="m-item"><span class="m-label">Owner</span> <span class="m-value" id="detailOwner">-</span></div>
+                        <div class="m-item"><span class="m-label">Scope</span> <span class="m-value badge bg-violet" id="detailScope">-</span></div>
+                        <div class="m-item"><span class="m-label">Type</span> <span class="m-value" id="detailType">-</span></div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <label class="label-sm">RECENT ACCESS</label>
+                    <ul class="access-list" id="detailAccessLogs">
+                        <!-- Logs injected here -->
+                    </ul>
+                </div>
+                <div class="detail-actions mt-auto">
+                    <button class="btn btn-primary w-100 mb-2">Decrypt & Show</button>
+                    <button class="btn btn-outline-secondary w-100">Share Access</button>
+                </div>
+            </div>
+        </aside>
     </div>
+
     <script src="{% static 'app/app.js' %}"></script>
-  </body>
+</body>
 </html>
