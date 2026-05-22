@@ -11,13 +11,13 @@ from .utils import log_audit_event
 
 class VaultItemViewSet(viewsets.ModelViewSet):
     serializer_class = VaultItemSerializer
-    permission_classes = [IsAuthenticated, CanViewVaultItem]
+    permission_classes = [IsAuthenticated, CanViewVaultItem, CanCreateVaultItem]
 
     def get_permissions(self):
         if self.action == "create":
             return [IsAuthenticated(), CanCreateVaultItem()]
         if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), CanManageVaultItem()]
+            return [IsAuthenticated(), CanManageVaultItem(), CanCreateVaultItem()]
         return super().get_permissions()
 
     def get_queryset(self):

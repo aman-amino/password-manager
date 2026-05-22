@@ -1,7 +1,14 @@
 from rest_framework.permissions import BasePermission
-from app.models import User
-from .models import VaultItem
-from .policy import can_view_vault_item, can_manage_vault_item
+
+from .policy import can_view_vault_item, can_manage_vault_item, can_create_vault_item
+
+
+class CanCreateVaultItem(BasePermission):
+    def has_permission(self, request, view) -> bool:
+        if request.method != "POST":
+            return True
+        scope = request.data.get("scope")
+        return can_create_vault_item(request.user, scope).allowed
 
 
 class CanCreateVaultItem(BasePermission):

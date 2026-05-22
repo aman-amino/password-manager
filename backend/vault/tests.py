@@ -265,12 +265,12 @@ class AdminRoleRestrictionTests(APITestCase):
         response = self.client.get(f"/admin_{self.token}/")
         self.assertEqual(response.status_code, 404)
 
-class VaultItemCreationRestrictionTests(APITestCase):
+class PrivilegeEscalationTests(APITestCase):
     def setUp(self):
         self.org = Organization.objects.create(name="Test Org", slug="test-org")
         self.dept = Department.objects.create(organization=self.org, name="Test Dept", slug="test-dept")
         self.user = User.objects.create_user(
-            username="user", password="password", role=User.Role.USER,
+            username="regular_user", password="password", role=User.Role.USER,
             organization=self.org, department=self.dept
         )
         self.subadmin = User.objects.create_user(
@@ -278,65 +278,54 @@ class VaultItemCreationRestrictionTests(APITestCase):
             organization=self.org, department=self.dept
         )
 
-    def test_user_can_create_personal_item(self):
+    def test_regular_user_cannot_create_org_item(self):
+        """A regular user should NOT be able to create an ORG-scoped item."""
         self.client.force_authenticate(user=self.user)
         url = reverse("vault-item-list")
         data = {
-            "title": "My Personal Secret",
-            "scope": VaultItem.Scope.PERSONAL,
-            "encrypted_blob": "c2VjcmV0", # 'secret' in base64
-            "nonce": "bm9uY2U="
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_user_cannot_create_org_item(self):
-        self.client.force_authenticate(user=self.user)
-        url = reverse("vault-item-list")
-        data = {
-            "title": "Org Secret",
+            "title": "Malicious Org Secret",
             "scope": VaultItem.Scope.ORG,
-            "encrypted_blob": "c2VjcmV0",
+            "encrypted_blob": "YmFzZTY0ZGF0YQ==",
             "nonce": "bm9uY2U="
         }
         response = self.client.post(url, data)
-        # This is expected to FAIL before the fix
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_user_cannot_create_dept_item(self):
+    def test_regular_user_cannot_create_dept_item(self):
+        """A regular user should NOT be able to create a DEPT-scoped item."""
         self.client.force_authenticate(user=self.user)
         url = reverse("vault-item-list")
         data = {
-            "title": "Dept Secret",
+            "title": "Malicious Dept Secret",
             "scope": VaultItem.Scope.DEPT,
-            "encrypted_blob": "c2VjcmV0",
+            "encrypted_blob": "YmFzZTY0ZGF0YQ==",
             "nonce": "bm9uY2U="
         }
         response = self.client.post(url, data)
-        # This is expected to FAIL before the fix
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_subadmin_can_create_dept_item(self):
-        self.client.force_authenticate(user=self.subadmin)
-        url = reverse("vault-item-list")
-        data = {
-            "title": "Dept Secret",
-            "scope": VaultItem.Scope.DEPT,
-            "encrypted_blob": "c2VjcmV0",
-            "nonce": "bm9uY2U="
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_subadmin_cannot_create_org_item(self):
+        """A subadmin should NOT be able to create an ORG-scoped item."""
         self.client.force_authenticate(user=self.subadmin)
         url = reverse("vault-item-list")
         data = {
-            "title": "Org Secret",
+            "title": "Malicious Org Secret",
             "scope": VaultItem.Scope.ORG,
-            "encrypted_blob": "c2VjcmV0",
+            "encrypted_blob": "YmFzZTY0ZGF0YQ==",
             "nonce": "bm9uY2U="
         }
         response = self.client.post(url, data)
-        # This is expected to FAIL before the fix
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_regular_user_can_create_personal_item(self):
+        """A regular user should be able to create a PERSONAL-scoped item."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse("vault-item-list")
+        data = {
+            "title": "My Secret",
+            "scope": VaultItem.Scope.PERSONAL,
+            "encrypted_blob": "YmFzZTY0ZGF0YQ==",
+            "nonce": "bm9uY2U="
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
