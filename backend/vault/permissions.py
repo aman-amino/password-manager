@@ -1,6 +1,25 @@
 from rest_framework.permissions import BasePermission
-
+from app.models import User
+from .models import VaultItem
 from .policy import can_view_vault_item, can_manage_vault_item
+
+
+class CanCreateVaultItem(BasePermission):
+    def has_permission(self, request, view) -> bool:
+        if request.method != "POST":
+            return True
+
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+
+        scope = request.data.get("scope")
+        if scope == VaultItem.Scope.ORG:
+            return user.role in (User.Role.SUPERADMIN, User.Role.ADMIN)
+        if scope == VaultItem.Scope.DEPT:
+            return user.role in (User.Role.SUPERADMIN, User.Role.ADMIN, User.Role.SUBADMIN)
+
+        return True
 
 
 class CanViewVaultItem(BasePermission):
