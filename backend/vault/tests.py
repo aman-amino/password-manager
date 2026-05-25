@@ -329,3 +329,41 @@ class PrivilegeEscalationTests(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+class MFAEnforcementTests(APITestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name="MFA Org", slug="mfa-org")
+        self.user = User.objects.create_user(
+            username="mfauser", password="password", role=User.Role.USER,
+            organization=self.org, mfa_enabled=True
+        )
+        self.item = VaultItem.objects.create(
+            owner=self.user, organization=self.org,
+            scope=VaultItem.Scope.PERSONAL, title="MFA Protected Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+
+    def test_mfa_enabled_user_denied_without_last_mfa_login(self):
+        """Users with MFA enabled but no last_mfa_login should be denied."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse("vault-item-detail", args=[self.item.id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_mfa_enabled_user_allowed_with_last_mfa_login(self):
+        """Users with MFA enabled and a valid last_mfa_login should be allowed."""
+        self.user.last_mfa_login = timezone.now()
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        url = reverse("vault-item-detail", args=[self.item.id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_mfa_disabled_user_allowed(self):
+        """Users with MFA disabled should be allowed without MFA login."""
+        self.user.mfa_enabled = False
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        url = reverse("vault-item-detail", args=[self.item.id])
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
