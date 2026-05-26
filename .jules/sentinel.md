@@ -37,3 +37,8 @@
 **Vulnerability:** Resource creation (VaultItem) lacked role-based scope validation, allowing regular users to create items in ORG/DEPT scopes despite being unable to view them.
 **Learning:** Object-level permissions and queryset filtering do not implicitly protect the `create` path. Input fields that dictate resource visibility or ownership must be validated against the actor's role.
 **Prevention:** Use DRF `has_permission` or serializer validation to strictly enforce role-based constraints on "owner" or "scope" fields during creation.
+
+## 2026-05-26 - [MFA Enforcement Gap]
+**Vulnerability:** MFA fields (mfa_enabled, last_mfa_login) existed in the User model, but no permission logic enforced their use in the API views.
+**Learning:** Having MFA infrastructure (TOTP secrets, verification views) is insufficient without explicit enforcement in the authorization layer (e.g., DRF Permission classes).
+**Prevention:** For any security feature like MFA, always implement a corresponding "Requirement" check that intercepts resource access.

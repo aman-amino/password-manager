@@ -329,3 +329,56 @@ class PrivilegeEscalationTests(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+class MFARequirementTests(APITestCase):
+    def setUp(self):
+        self.org = Organization.objects.create(name="MFA Org", slug="mfa-org")
+        self.user = User.objects.create_user(
+            username="mfauser", password="password", role=User.Role.USER, organization=self.org
+        )
+        self.item = VaultItem.objects.create(
+            owner=self.user, organization=self.org,
+            scope=VaultItem.Scope.PERSONAL, title="MFA Secret",
+            encrypted_blob=b"data", nonce=b"nonce"
+        )
+        self.url = reverse("vault-item-detail", args=[self.item.id])
+
+    def test_access_allowed_mfa_disabled(self):
+        """User with MFA disabled should be allowed access."""
+        self.user.mfa_enabled = False
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_access_denied_mfa_enabled_not_verified(self):
+        """User with MFA enabled but not verified should be denied access."""
+        self.user.mfa_enabled = True
+        self.user.last_mfa_login = None
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_access_allowed_mfa_enabled_verified(self):
+        """User with MFA enabled and verified should be allowed access."""
+        self.user.mfa_enabled = True
+        self.user.last_mfa_login = timezone.now()
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_access_denied_mfa_expired(self):
+        """User with MFA enabled but last_mfa_login before last_login should be denied."""
+        self.user.mfa_enabled = True
+        # Set last_login to now, and last_mfa_login to 1 hour ago
+        now = timezone.now()
+        self.user.last_login = now
+        self.user.last_mfa_login = now - timedelta(hours=1)
+        self.user.save()
+
+        # We use a custom login to simulate a session where last_login is set
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
