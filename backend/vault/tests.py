@@ -334,7 +334,8 @@ class MFARequirementTests(APITestCase):
     def setUp(self):
         self.org = Organization.objects.create(name="MFA Org", slug="mfa-org")
         self.user = User.objects.create_user(
-            username="mfauser", password="password", role=User.Role.USER, organization=self.org
+            username="mfauser", password="password", role=User.Role.USER,
+            organization=self.org, mfa_enabled=True
         )
         self.item = VaultItem.objects.create(
             owner=self.user, organization=self.org,
