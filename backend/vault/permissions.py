@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from app.models import User
+from .models import VaultItem
 from .policy import can_view_vault_item, can_manage_vault_item, can_create_vault_item
 
 
@@ -13,8 +15,16 @@ class RequiresMFA(BasePermission):
         if not user or not user.is_authenticated:
             return False
 
-        if not user.mfa_enabled:
-            return True
+        if user.mfa_enabled:
+            if not user.last_mfa_login:
+                return False
+            # Check if MFA login is associated with the current session
+            # (at or after the most recent password-based login)
+            if user.last_login and user.last_mfa_login < user.last_login:
+                return False
+
+        return True
+
 
         if not user.last_mfa_login:
             return False
