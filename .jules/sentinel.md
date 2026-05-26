@@ -37,3 +37,13 @@
 **Vulnerability:** Resource creation (VaultItem) lacked role-based scope validation, allowing regular users to create items in ORG/DEPT scopes despite being unable to view them.
 **Learning:** Object-level permissions and queryset filtering do not implicitly protect the `create` path. Input fields that dictate resource visibility or ownership must be validated against the actor's role.
 **Prevention:** Use DRF `has_permission` or serializer validation to strictly enforce role-based constraints on "owner" or "scope" fields during creation.
+
+## 2026-02-10 - [Permission Redundancy and Shadowing]
+**Vulnerability:** Multiple conflicting definitions of the same permission class (`CanCreateVaultItem`) existed in the same file.
+**Learning:** Python allows re-definition of classes, where the last definition shadows previous ones. This can lead to security bypasses if an earlier, stricter definition is overwritten by a later, looser one without the developer noticing.
+**Prevention:** Consolidate permission logic into a single class or use distinct names. Always audit permission files for duplicate class or function names.
+
+## 2026-02-10 - [Session-Based MFA Enforcement Pattern]
+**Vulnerability:** Users with MFA enabled could still access sensitive vault operations if they only completed primary authentication (e.g. session hijacking or password compromise).
+**Learning:** MFA should be enforced not just at login, but at the API layer for sensitive resources. By comparing `last_mfa_login` with `last_login`, we ensure that the second factor was provided for the current session.
+**Prevention:** Implement a standard `RequiresMFA` permission class and apply it to all viewsets handling sensitive data (secrets, keys, etc.).
