@@ -136,3 +136,17 @@
 - Audit Logging: Expanded signals to log logout and failed login attempts.
 - Modern UI: Integrated high-fidelity dark-mode design inspired by ChatGPT/Vercel with Geist/JetBrains Mono typography.
 - Verification: Passed all existing backend tests and verified UI layout with Playwright screenshots.
+
+### MFA Enforcement and Permission Refactoring (Session 25)
+- Identified a security gap where MFA was not enforced at the API level despite model and view support.
+- Implemented  permission class in .
+- Refactored  to remove three redundant and broken  definitions.
+- Integrated  into .
+- Verified enforcement with a new test suite  in .
+
+### MFA Enforcement and Permission Refactoring (Session 25)
+- Identified a security gap where MFA was not enforced at the API level despite model and view support.
+- Implemented `RequiresMFA` permission class in `backend/vault/permissions.py`.
+- Refactored `backend/vault/permissions.py` to remove three redundant and broken `CanCreateVaultItem` definitions.
+- Integrated `RequiresMFA` into `VaultItemViewSet`.
+- Verified enforcement with a new test suite `MFARequirementTests` in `backend/vault/tests.py`.

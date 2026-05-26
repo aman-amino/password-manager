@@ -37,3 +37,5 @@
 - MFA support implemented (TOTP secret storage and verification view).
 - Audit logging expanded to auth failures and logouts.
 - Modern UI integrated based on Stitch design.
+- Multi-factor authentication is now strictly enforced for all vault item operations via DRF Permission classes.
+- Redundant and broken permission classes in `backend/vault/permissions.py` have been refactored into a single, clean implementation.

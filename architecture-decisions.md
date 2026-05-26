@@ -29,3 +29,7 @@
 - VaultItem stores encrypted blobs; VaultItemKey stores per-recipient wrapped data keys.
 - ScopeKey stores encrypted org/dept wrapping keys with rotation metadata.
 - AuditEvent provides immutable security logs.
+
+## MFA Enforcement
+- Multi-Factor Authentication is enforced for all vault item access and management.
+- Users with MFA enabled must have verified their identity within the current session (last_mfa_login >= last_login).

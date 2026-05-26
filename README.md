@@ -4,6 +4,7 @@ Maximum-security, zero-knowledge password manager with client-side cryptography 
 Dependencies are pinned to latest stable versions (checked 2026-02-09) in `backend/requirements.txt`.
 
 ## Security Goals
+- Strict MFA enforcement for all sensitive vault operations.
 - Server never sees plaintext secrets or master keys.
 - Personal secrets remain owner-only even for admins.
 - Least privilege access aligned with `final-access-matrix.md`.
