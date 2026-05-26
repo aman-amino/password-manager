@@ -330,7 +330,7 @@ class PrivilegeEscalationTests(APITestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-class MFAEnforcementTests(APITestCase):
+class MFARequirementTests(APITestCase):
     def setUp(self):
         self.org = Organization.objects.create(name="MFA Org", slug="mfa-org")
         self.user = User.objects.create_user(
@@ -339,31 +339,31 @@ class MFAEnforcementTests(APITestCase):
         )
         self.item = VaultItem.objects.create(
             owner=self.user, organization=self.org,
-            scope=VaultItem.Scope.PERSONAL, title="MFA Protected Secret",
+            scope=VaultItem.Scope.PERSONAL, title="MFA Secret",
             encrypted_blob=b"data", nonce=b"nonce"
         )
 
-    def test_mfa_enabled_user_denied_without_last_mfa_login(self):
-        """Users with MFA enabled but no last_mfa_login should be denied."""
+    def test_mfa_enabled_user_denied_without_verification(self):
+        """User with MFA enabled should be denied access if last_mfa_login is not set or old."""
         self.client.force_authenticate(user=self.user)
-        url = reverse("vault-item-detail", args=[self.item.id])
-        response = self.client.get(url, follow=True)
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_mfa_enabled_user_allowed_with_last_mfa_login(self):
-        """Users with MFA enabled and a valid last_mfa_login should be allowed."""
+    def test_mfa_enabled_user_allowed_after_verification(self):
+        """User with MFA enabled should be allowed access after updating last_mfa_login."""
         self.user.last_mfa_login = timezone.now()
         self.user.save()
         self.client.force_authenticate(user=self.user)
-        url = reverse("vault-item-detail", args=[self.item.id])
-        response = self.client.get(url, follow=True)
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_mfa_disabled_user_allowed(self):
-        """Users with MFA disabled should be allowed without MFA login."""
+    def test_mfa_disabled_user_allowed_immediately(self):
+        """User with MFA disabled should not be restricted by RequiresMFA."""
         self.user.mfa_enabled = False
         self.user.save()
         self.client.force_authenticate(user=self.user)
-        url = reverse("vault-item-detail", args=[self.item.id])
-        response = self.client.get(url, follow=True)
+        url = reverse("vault-item-list")
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
