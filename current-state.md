@@ -32,6 +32,9 @@
     - Security settings hardened for production
     - Backend tests added for core security logic
 
+- Fixed DJANGO_SETTINGS_MODULE in docker-compose.yml.
+- Fixed class shadowing in backend/app/apps.py.
+- Created .env file for local development.
 ## Step 11: Production Readiness
 - Query performance optimized for VaultItem API.
 - MFA support implemented (TOTP secret storage and verification view).
