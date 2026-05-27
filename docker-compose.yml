@@ -20,7 +20,7 @@ services:
     env_file:
       - ./.env
     environment:
-      DJANGO_SETTINGS_MODULE: app.settings
+      DJANGO_SETTINGS_MODULE: config.settings
     volumes:
       - ./backend:/app:rw
     depends_on:

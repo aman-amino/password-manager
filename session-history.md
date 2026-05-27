@@ -22,3 +22,4 @@ Session 21: 2026-02-10 18:35 Status: CSP/static fix. Highlights: Allowed Bootstr
 Session 22: 2026-02-10 18:47 Status: Next steps documented. Highlights: Added prioritized next steps list. Where to find changes: README.md, notes-and-decisions.md, current-state.md, AGENTS.md, session-history.md.
 Session 23: 2026-02-10 20:15 Status: Security enhancements and bug fixes. Highlights: Implemented audit logging, rotating admin URL, superadmin visibility fixes, and backend tests. Where to find changes: backend/, notes-and-decisions.md, current-state.md, progress-tracker.md, session-history.md.
 Session 24: 2026-05-20 15:09 status: Complete, highlights: Performance, MFA, Audit, and Modern UI, Where to find changes: backend/, frontend/
+Session 25: 2026-02-10 10:00 status: Fix configuration and environment, highlights: Fixed DJANGO_SETTINGS_MODULE and app.apps shadowing, added .env template, Where to find changes: docker-compose.yml, backend/app/apps.py, .env
