@@ -59,6 +59,8 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+*Note: Since the application relies on WebCrypto for client-side zero-knowledge encryption, it must be accessed via `http://localhost:8000/` or `http://127.0.0.1:8000/` (which are treated as secure contexts by browsers) or HTTPS. Accessing the backend via custom hostnames or network IP addresses without HTTPS will result in WebCrypto being disabled and a secure context error on the login screen.*
+
 ## Browser Crypto (Step 6)
 - WebCrypto helpers live in `frontend/crypto.js`.
 

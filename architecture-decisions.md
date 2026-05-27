@@ -29,3 +29,7 @@
 - VaultItem stores encrypted blobs; VaultItemKey stores per-recipient wrapped data keys.
 - ScopeKey stores encrypted org/dept wrapping keys with rotation metadata.
 - AuditEvent provides immutable security logs.
+
+## Secure Context Gating
+- Gated WebCrypto operations with client-side checks for `window.isSecureContext` and `crypto.subtle`.
+- Prominently alert the user about context requirements (HTTPS/localhost) rather than crashing with unhandled javascript errors.

@@ -40,3 +40,9 @@
 - MFA support implemented (TOTP secret storage and verification view).
 - Audit logging expanded to auth failures and logouts.
 - Modern UI integrated based on Stitch design.
+## Step 12: MFA Enforcement and Permission Refactor
+- Centralized policy engine enforcement of role permissions.
+- Refactored object-level checks to align with access matrix.
+## Step 13: Secure Context Handling & UI Contrast Polish
+- Added check for SubtleCrypto and Secure Context (`window.isSecureContext`) with clear guidance error message.
+- Re-styled login/registration form labels, form text, and inputs with high-contrast, premium dark mode styling.

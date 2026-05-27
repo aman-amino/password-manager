@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userMasterKey = await crypto.deriveMasterKey(rootKey);
 
                 const dummyNonce = crypto.randomBytes(12);
-                const rawMasterKey = await window.crypto.subtle.exportKey('raw', userMasterKey);
+                const rawMasterKey = await crypto.exportKeyRaw(userMasterKey);
                 const encryptedMasterKey = await crypto.encryptAesGcm(userMasterKey, new Uint8Array(rawMasterKey), dummyNonce);
 
                 const res = await fetch('/api/register/', {

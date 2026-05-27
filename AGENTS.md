@@ -4,7 +4,7 @@
 
 **Started:**   
 **Location:** d:\password\new-manager 
-**Status:** Step 9 complete
+**Status:** Step 13 complete
 
 ## Session History
 
@@ -143,6 +143,9 @@
 - [x] Step 8: Hardening checklist 
 - [x] Step 9: Verification 
 - [x] Step 10: Security enhancements and bug fixes
+- [x] Step 11: Performance optimization and UI modernization
+- [x] Step 12: MFA Enforcement and Permission Refactor
+- [x] Step 13: Secure Context Handling & UI Contrast Polish
 
 ---
 
@@ -167,11 +170,12 @@
 
 ## Current State
 
-**Virtual Environment:** `.venv` (pip bootstrap failed due to temp permission error)
+**Virtual Environment:** `.venv` inside `backend/`
 **Django Project:** Initialized (Core apps: `vault`, `app`)
-**Database:** SQLite for development, PostgreSQL-ready
+**Database:** SQLite for local test fallback, PostgreSQL-ready for container run
 **Dependencies:** Pinned to latest stable versions in `backend/requirements.txt`
 **Staticfiles:** `backend/staticfiles/` ignored (collectstatic output)
+**Step 13 Complete:** Secured cryptographic operations in non-HTTPS/localhost environments with secure context alerts, and polished dark-theme contrast.
 
 ## rules
 1. Always use the latest version of Django and Django REST Framework
@@ -223,7 +227,17 @@
 - Next steps documented in `notes-and-decisions.md`.
 - Staticfiles ignore documented in `notes-and-decisions.md`.
 
-### Session 24:
+### Session 24: 
 **Status:** Performance, Security, and UI Modernization
 **Current Step:** 11/11
 **Final Action:** Optimized queries, implemented MFA fields/views, expanded audit logging, and integrated modern design system.
+
+### Session 25:
+**Status:** Environment configuration fixes
+**Current Step:** 12/12
+**Final Action:** Fixed DJANGO_SETTINGS_MODULE in docker-compose, resolved app.apps class shadowing, and created .env file template.
+
+### Session 26:
+**Status:** WebCrypto secure context handling & UI contrast polish
+**Current Step:** 13/13
+**Final Action:** Implemented WebCrypto secure context check with user-friendly error alerts, added exportKeyRaw, and styled login card labels and text elements for high contrast readability.

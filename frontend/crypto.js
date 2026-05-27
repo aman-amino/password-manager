@@ -1,6 +1,25 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+function getSubtleCrypto() {
+  if (typeof window === 'undefined') {
+    throw new Error("WebCrypto is only available in a browser environment.");
+  }
+  const cryptoObj = window.crypto || window.msCrypto;
+  if (!cryptoObj) {
+    throw new Error("WebCrypto API is not supported in this browser.");
+  }
+  if (!cryptoObj.subtle) {
+    if (!window.isSecureContext) {
+      throw new Error(
+        "Secure Context Required: Zero-knowledge cryptographic operations require HTTPS or localhost. Please access the application via https:// or http://localhost."
+      );
+    }
+    throw new Error("SubtleCrypto is not available in this environment.");
+  }
+  return cryptoObj.subtle;
+}
+
 export function toBase64(bytes) {
   let binary = "";
   bytes.forEach((b) => (binary += String.fromCharCode(b)));
@@ -18,12 +37,17 @@ export function fromBase64(b64) {
 
 export function randomBytes(length) {
   const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
+  const cryptoObj = typeof window !== 'undefined' ? (window.crypto || window.msCrypto) : null;
+  if (!cryptoObj) {
+    throw new Error("WebCrypto API is not supported in this browser.");
+  }
+  cryptoObj.getRandomValues(bytes);
   return bytes;
 }
 
 export async function importPassword(password) {
-  return crypto.subtle.importKey(
+  const subtle = getSubtleCrypto();
+  return subtle.importKey(
     "raw",
     encoder.encode(password),
     { name: "PBKDF2" },
@@ -33,8 +57,8 @@ export async function importPassword(password) {
 }
 
 export async function deriveRootKey(passwordKey, salt, iterations) {
-  // Derive 256 bits (32 bytes) from PBKDF2 as the base for HKDF
-  const rootBits = await crypto.subtle.deriveBits(
+  const subtle = getSubtleCrypto();
+  const rootBits = await subtle.deriveBits(
     {
       name: "PBKDF2",
       salt,
@@ -45,8 +69,7 @@ export async function deriveRootKey(passwordKey, salt, iterations) {
     256
   );
 
-  // Import derived bits as an HKDF key
-  return crypto.subtle.importKey(
+  return subtle.importKey(
     "raw",
     rootBits,
     { name: "HKDF" },
@@ -56,7 +79,8 @@ export async function deriveRootKey(passwordKey, salt, iterations) {
 }
 
 export async function deriveSubKey(rootKey, info, usage) {
-  return crypto.subtle.deriveKey(
+  const subtle = getSubtleCrypto();
+  return subtle.deriveKey(
     {
       name: "HKDF",
       hash: "SHA-256",
@@ -71,7 +95,8 @@ export async function deriveSubKey(rootKey, info, usage) {
 }
 
 export async function encryptAesGcm(key, plaintextBytes, nonce) {
-  const ciphertext = await crypto.subtle.encrypt(
+  const subtle = getSubtleCrypto();
+  const ciphertext = await subtle.encrypt(
     { name: "AES-GCM", iv: nonce },
     key,
     plaintextBytes
@@ -80,7 +105,8 @@ export async function encryptAesGcm(key, plaintextBytes, nonce) {
 }
 
 export async function decryptAesGcm(key, ciphertextBytes, nonce) {
-  const plaintext = await crypto.subtle.decrypt(
+  const subtle = getSubtleCrypto();
+  const plaintext = await subtle.decrypt(
     { name: "AES-GCM", iv: nonce },
     key,
     ciphertextBytes
@@ -94,4 +120,9 @@ export function utf8Encode(text) {
 
 export function utf8Decode(bytes) {
   return decoder.decode(bytes);
+}
+
+export async function exportKeyRaw(key) {
+  const subtle = getSubtleCrypto();
+  return await subtle.exportKey('raw', key);
 }

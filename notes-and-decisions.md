@@ -136,3 +136,12 @@
 - Audit Logging: Expanded signals to log logout and failed login attempts.
 - Modern UI: Integrated high-fidelity dark-mode design inspired by ChatGPT/Vercel with Geist/JetBrains Mono typography.
 - Verification: Passed all existing backend tests and verified UI layout with Playwright screenshots.
+
+## WebCrypto Secure Context & UI Contrast Polish (Session 26)
+- WebCrypto Error Resolution:
+    - Added `getSubtleCrypto()` helper in `crypto_helpers.js` and `crypto.js` to verify browser environment and check `window.isSecureContext`.
+    - If `crypto.subtle` is undefined, a clear, human-readable error is thrown detailing that a secure context (localhost or HTTPS) is required to run zero-knowledge operations.
+    - Updated `app.js` to use `crypto.exportKeyRaw` instead of calling `window.crypto.subtle.exportKey` directly.
+- Login UI Polish:
+    - Custom styled `.auth-card` in `styles.css` to override Bootstrap's dark `.text-muted` color, making all text labels (USERNAME, EMAIL, MASTER PASSWORD) and descriptive texts fully visible.
+    - Recreated a premium ChatGPT/Vercel-inspired card appearance with backdrop blurring for `.auth-overlay` and custom input border-focus rings matching the primary teal styling.
