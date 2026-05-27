@@ -1,10 +1,11 @@
 from rest_framework import serializers
-
-from .models import VaultItem
+from django.shortcuts import get_object_or_404
+from .models import VaultItem, AuditEvent, AccessGrant
 from .policy import can_create_vault_item
 
-
 class VaultItemSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = VaultItem
         fields = [
@@ -25,10 +26,18 @@ class VaultItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "owner", "organization", "department", "created_at", "updated_at"]
 
     def validate_encrypted_blob(self, value):
-        # Limit encrypted blob to 1MB to prevent potential DoS/storage exhaustion
-        MAX_SIZE = 1 * 1024 * 1024  # 1MB
+        if isinstance(value, str):
+            import base64
+            value = base64.b64decode(value)
+        MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
             raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
+        return value
+
+    def validate_nonce(self, value):
+        if isinstance(value, str):
+            import base64
+            value = base64.b64decode(value)
         return value
 
     def validate(self, attrs):
@@ -40,10 +49,6 @@ class VaultItemSerializer(serializers.ModelSerializer):
         if not decision.allowed:
             raise serializers.ValidationError(f"Permission denied for scope '{scope}': {decision.reason}")
 
-        if scope == VaultItem.Scope.ORG and user.organization_id is None:
-            raise serializers.ValidationError("Organization scope requires user organization.")
-        if scope == VaultItem.Scope.DEPT and user.department_id is None:
-            raise serializers.ValidationError("Department scope requires user department.")
         return attrs
 
     def create(self, validated_data):
@@ -51,4 +56,36 @@ class VaultItemSerializer(serializers.ModelSerializer):
         validated_data["owner"] = user
         validated_data["organization"] = user.organization
         validated_data["department"] = user.department
+        return super().create(validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        import base64
+        if ret.get('encrypted_blob'):
+            ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
+        if ret.get('nonce'):
+            ret['nonce'] = base64.b64encode(instance.nonce).decode()
+        return ret
+
+class AuditEventSerializer(serializers.ModelSerializer):
+    actor = serializers.StringRelatedField()
+    class Meta:
+        model = AuditEvent
+        fields = '__all__'
+
+class AccessGrantSerializer(serializers.ModelSerializer):
+    grantee_username = serializers.CharField(write_only=True)
+    grantee = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = AccessGrant
+        fields = ["id", "vault_item", "grantee", "grantee_username", "granted_by", "expires_at", "is_active"]
+        read_only_fields = ["id", "granted_by", "grantee"]
+
+    def create(self, validated_data):
+        username = validated_data.pop("grantee_username")
+        from app.models import User
+        grantee = get_object_or_404(User, username=username)
+        validated_data["grantee"] = grantee
+        validated_data["granted_by"] = self.context["request"].user
         return super().create(validated_data)

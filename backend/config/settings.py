@@ -1,19 +1,16 @@
 from pathlib import Path
-
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 from datetime import timedelta
 import os
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 load_dotenv(os.path.join(BASE_DIR.parent, ".env"))
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-DEBUG = os.getenv("DJANGO_DEBUG", "false").lower() == "true"
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", os.getenv("SECRET_KEY", get_random_secret_key()))
+DEBUG = os.getenv("DJANGO_DEBUG", os.getenv("DEBUG", "false")).lower() == "true"
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")).split(",") if h.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -64,6 +61,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+# Dual Database Support: Priority to DATABASE_URL (Postgres), fallback to SQLite
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -133,8 +131,9 @@ X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SAMESITE = "Strict"
 
+SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", os.getenv("SECURE_SSL_REDIRECT", str(not DEBUG))).lower() == "true"
+
 if not DEBUG:
-    SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "true").lower() == "true"
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year

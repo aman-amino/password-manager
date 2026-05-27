@@ -2,10 +2,11 @@ from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
-from .models import AuditEvent, VaultItem
+from app.models import User
+from .models import AuditEvent, VaultItem, AccessGrant
 from .permissions import CanViewVaultItem, CanManageVaultItem, CanCreateVaultItem, RequiresMFA
 from .policy import can_manage_vault_item, vault_item_queryset_for_user
-from .serializers import VaultItemSerializer
+from .serializers import VaultItemSerializer, AuditEventSerializer, AccessGrantSerializer
 from .utils import log_audit_event
 
 
@@ -21,7 +22,7 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department").prefetch_related("tag_links__tag")
+        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -40,3 +41,36 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         instance.is_deleted = True
         instance.save(update_fields=["is_deleted"])
         log_audit_event(self.request, AuditEvent.Action.DELETE, "vault_item", instance.id)
+
+class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AuditEventSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        target_id = self.request.query_params.get('target_id')
+        target_type = self.request.query_params.get('target_type')
+
+        qs = AuditEvent.objects.all()
+        if target_id:
+            qs = qs.filter(target_id=target_id)
+        if target_type:
+            qs = qs.filter(target_type=target_type)
+
+        if user.role == User.Role.SUPERADMIN:
+            return qs.order_by('-created_at')
+        if user.organization:
+            return qs.filter(organization=user.organization).order_by('-created_at')
+        return qs.filter(actor=user).order_by('-created_at')
+
+class AccessGrantViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccessGrantSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return AccessGrant.objects.filter(grantee=user, is_active=True) | AccessGrant.objects.filter(granted_by=user)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        log_audit_event(self.request, AuditEvent.Action.UPDATE, "access_grant", instance.id, {"grantee": instance.grantee.username})
