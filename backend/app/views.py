@@ -1,4 +1,5 @@
 import secrets
+import pyotp
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import render, redirect
@@ -61,9 +62,7 @@ def verify_mfa(request):
     if not user.totp_secret:
         return JsonResponse({"status": "error", "message": "MFA not set up"}, status=400)
 
-    # Placeholder: Accept '123456' as a valid code for verification in dev
-    # Real implementation: pyotp.TOTP(user.totp_secret).verify(code)
-    is_valid = (code == "123456")
+    is_valid = pyotp.TOTP(user.totp_secret).verify(code)
 
     if is_valid:
         user.last_mfa_login = timezone.now()
