@@ -51,17 +51,17 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
-        qs = AuditEvent.objects.all()
+        qs = AuditEvent.objects.select_related("actor", "organization").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
         if target_type:
             qs = qs.filter(target_type=target_type)
 
         if user.role == User.Role.SUPERADMIN:
-            return qs.order_by('-created_at')
+            return qs.order_by("-created_at")
         if user.organization:
-            return qs.filter(organization=user.organization).order_by('-created_at')
-        return qs.filter(actor=user).order_by('-created_at')
+            return qs.filter(organization=user.organization).order_by("-created_at")
+        return qs.filter(actor=user).order_by("-created_at")
 
 class AccessGrantViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
