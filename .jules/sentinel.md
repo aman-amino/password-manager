@@ -47,3 +47,8 @@
 **Vulnerability:** Users with MFA enabled could still access sensitive vault operations if they only completed primary authentication (e.g. session hijacking or password compromise).
 **Learning:** MFA should be enforced not just at login, but at the API layer for sensitive resources. By comparing `last_mfa_login` with `last_login`, we ensure that the second factor was provided for the current session.
 **Prevention:** Implement a standard `RequiresMFA` permission class and apply it to all viewsets handling sensitive data (secrets, keys, etc.).
+
+## 2026-02-11 - [Hardcoded Authentication Bypass for Development]
+**Vulnerability:** A hardcoded TOTP code ('123456') was accepted in the `verify_mfa` view, allowing anyone to bypass MFA for any user.
+**Learning:** Placeholder code used for development ease often survives into "production-ready" codebases if not strictly audited. Relying on hardcoded values for security verification is a critical failure.
+**Prevention:** Never use hardcoded secrets or bypasses, even in development. Use environment-specific configuration or mock objects in tests instead of modifying the core logic with placeholders.
