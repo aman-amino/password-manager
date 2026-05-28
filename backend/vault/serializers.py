@@ -82,6 +82,18 @@ class AccessGrantSerializer(serializers.ModelSerializer):
         fields = ["id", "vault_item", "grantee", "grantee_username", "granted_by", "expires_at", "is_active"]
         read_only_fields = ["id", "granted_by", "grantee"]
 
+    def validate(self, attrs):
+        request = self.context["request"]
+        user = request.user
+        item = attrs.get("vault_item")
+
+        from .policy import can_manage_vault_item
+        decision = can_manage_vault_item(user, item)
+        if not decision.allowed:
+            raise serializers.ValidationError(f"Permission denied: You cannot grant access to this item. {decision.reason}")
+
+        return attrs
+
     def create(self, validated_data):
         username = validated_data.pop("grantee_username")
         from app.models import User
