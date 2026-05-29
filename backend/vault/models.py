@@ -157,4 +157,5 @@ class AuditEvent(TimeStampedModel):
         indexes = [
             models.Index(fields=["organization", "created_at"]),
             models.Index(fields=["actor", "created_at"]),
+            models.Index(fields=["target_type", "target_id"]),
         ]
