@@ -43,7 +43,7 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         log_audit_event(self.request, AuditEvent.Action.DELETE, "vault_item", instance.id)
 
 class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RequiresMFA]
     serializer_class = AuditEventSerializer
 
     def get_queryset(self):
@@ -64,7 +64,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         return qs.filter(actor=user).order_by("-created_at")
 
 class AccessGrantViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RequiresMFA]
     serializer_class = AccessGrantSerializer
 
     def get_queryset(self):
@@ -73,4 +73,4 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        log_audit_event(self.request, AuditEvent.Action.UPDATE, "access_grant", instance.id, {"grantee": instance.grantee.username})
+        log_audit_event(self.request, AuditEvent.Action.UPDATE, "access_grant", instance.id, metadata={"grantee": instance.grantee.username})
