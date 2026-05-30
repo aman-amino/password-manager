@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -22,7 +23,8 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department")
+        # Optimization: Only select 'owner' as 'organization' and 'department' are rendered as IDs in the serializer
+        return vault_item_queryset_for_user(self.request.user).select_related("owner")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -59,7 +61,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user.role == User.Role.SUPERADMIN:
             return qs.order_by("-created_at")
-        if user.organization:
+        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization:
             return qs.filter(organization=user.organization).order_by("-created_at")
         return qs.filter(actor=user).order_by("-created_at")
 
@@ -69,7 +71,12 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return AccessGrant.objects.filter(grantee=user, is_active=True) | AccessGrant.objects.filter(granted_by=user)
+        # Optimization: Use select_related to avoid N+1 query bottlenecks during serialization
+        return AccessGrant.objects.select_related(
+            "grantee", "vault_item", "granted_by"
+        ).filter(
+            Q(grantee=user, is_active=True) | Q(granted_by=user)
+        )
 
     def perform_create(self, serializer):
         instance = serializer.save()

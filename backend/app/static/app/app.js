@@ -165,8 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             const view = link.dataset.view;
-            navLinks.forEach(l => l.classList.remove('active'));
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                l.removeAttribute('aria-current');
+            });
             link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
 
             viewPanes.forEach(p => p.classList.add('d-none'));
             const targetView = document.getElementById(view + 'View');

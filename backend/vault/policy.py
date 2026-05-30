@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Iterable
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Exists
 
 from app.models import User
 from .models import AccessGrant, VaultItem
@@ -105,31 +105,34 @@ def vault_item_queryset_for_user(user: User):
 
     # regular user + others
     now = timezone.now()
-    grant_ids = AccessGrant.objects.filter(
+
+    # Optimization: Use Exists subquery instead of evaluating a list of IDs
+    active_grants = AccessGrant.objects.filter(
+        vault_item=OuterRef('pk'),
         grantee=user,
         is_active=True
     ).filter(
         Q(expires_at__isnull=True) | Q(expires_at__gt=now)
-    ).values_list("vault_item_id", flat=True)
+    )
 
     base = VaultItem.objects.filter(is_deleted=False, organization=user.organization)
 
     if user.role == User.Role.ADMIN:
         # Admins see everything in org except other's personal items, PLUS grants
         return base.exclude(
-            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user) & ~Q(id__in=grant_ids)
+            Q(scope=VaultItem.Scope.PERSONAL) & ~Q(owner=user) & ~Exists(active_grants)
         )
 
     if user.role == User.Role.SUBADMIN:
         # Subadmins see items they own, items with grants, and DEPT items in their department
         return base.filter(
             Q(owner=user) |
-            Q(id__in=grant_ids) |
+            Exists(active_grants) |
             (Q(department=user.department) & Q(scope=VaultItem.Scope.DEPT))
         )
 
     # regular user
-    return base.filter(Q(owner=user) | Q(id__in=grant_ids))
+    return base.filter(Q(owner=user) | Exists(active_grants))
 
 
 def filter_personal_owner_only(items: Iterable[VaultItem], user: User) -> Iterable[VaultItem]:
