@@ -22,7 +22,9 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department")
+        # Optimization: Only select 'owner' since 'organization' and 'department'
+        # are serialized as primary keys in VaultItemSerializer.
+        return vault_item_queryset_for_user(self.request.user).select_related("owner")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -51,6 +53,8 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
+        # Optimization: select_related("actor") is needed for StringRelatedField.
+        # "organization" is serialized as PK, so join is not strictly necessary but kept if needed for filtering.
         qs = AuditEvent.objects.select_related("actor", "organization").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
@@ -59,7 +63,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user.role == User.Role.SUPERADMIN:
             return qs.order_by("-created_at")
-        if user.organization:
+        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization:
             return qs.filter(organization=user.organization).order_by("-created_at")
         return qs.filter(actor=user).order_by("-created_at")
 
@@ -69,7 +73,9 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return AccessGrant.objects.filter(grantee=user, is_active=True) | AccessGrant.objects.filter(granted_by=user)
+        # Optimization: select_related grantee and granted_by to avoid N+1 queries in serializer.
+        return (AccessGrant.objects.filter(grantee=user, is_active=True) |
+                AccessGrant.objects.filter(granted_by=user)).select_related("grantee", "granted_by")
 
     def perform_create(self, serializer):
         instance = serializer.save()

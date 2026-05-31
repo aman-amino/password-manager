@@ -165,8 +165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             const view = link.dataset.view;
-            navLinks.forEach(l => l.classList.remove('active'));
+            navLinks.forEach(l => {
+                l.classList.remove('active');
+                l.removeAttribute('aria-current');
+            });
             link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
 
             viewPanes.forEach(p => p.classList.add('d-none'));
             const targetView = document.getElementById(view + 'View');
@@ -175,6 +179,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             viewTitle.textContent = view.charAt(0).toUpperCase() + view.slice(1);
             if (view === 'vault') vaultControls.classList.remove('d-none');
             else vaultControls.classList.add('d-none');
+
+            // Trigger view-specific loads
+            if (view === 'shared') loadRequests();
+            if (view === 'audit') loadAuditLogs();
+            if (view === 'people') loadPeople();
         });
     });
 
@@ -196,12 +205,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const query = searchInput.value.toLowerCase();
         const activeFilter = document.querySelector('.filter-chip.active').textContent.toLowerCase();
 
+        // Clear existing content efficiently
         vaultGrid.innerHTML = '';
         const filtered = secrets.filter(item => {
             const matchesSearch = item.title.toLowerCase().includes(query);
             const matchesFilter = activeFilter === 'all' || item.scope === activeFilter;
             return matchesSearch && matchesFilter;
         });
+
+        // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
+        const fragment = document.createDocumentFragment();
 
         filtered.forEach(item => {
             const card = document.createElement('div');
@@ -221,8 +234,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
             card.addEventListener('click', () => showDetail(item));
-            vaultGrid.appendChild(card);
+            fragment.appendChild(card);
         });
+        vaultGrid.appendChild(fragment);
         document.getElementById('itemCount').textContent = `${filtered.length} Secrets`;
     }
 
@@ -232,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailType').textContent = item.item_type;
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
+        loadItemAuditLogs(item.id);
     }
 
     closePaneBtn.addEventListener('click', () => {
@@ -326,7 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Search & Filter ---
-    const searchInput = document.querySelector('.search-bar input');
+    const searchInput = document.getElementById('vault-search');
     const filterChips = document.querySelectorAll('.filter-chip');
 
     if (searchInput) {
@@ -337,8 +352,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     filterChips.forEach(chip => {
         chip.addEventListener('click', () => {
-            filterChips.forEach(c => c.classList.remove('active'));
+            filterChips.forEach(c => {
+                c.classList.remove('active');
+                c.setAttribute('aria-pressed', 'false');
+            });
             chip.classList.add('active');
+            chip.setAttribute('aria-pressed', 'true');
             renderVault();
         });
     });
@@ -362,10 +381,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
-    // --- Init ---
-    checkAuth();
-});
 
     // --- Sharing Logic ---
     const shareBtn = document.querySelector('.detail-actions .btn-outline-secondary');
@@ -444,13 +459,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Call loadRequests when clicking Shared tab
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (link.dataset.view === 'shared') loadRequests();
-        });
-    });
-
     // --- Audit Logs View ---
     async function loadAuditLogs() {
         const auditLogBody = document.getElementById('auditLogBody');
@@ -478,12 +486,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (link.dataset.view === 'audit') loadAuditLogs();
-        });
-    });
-
     // --- Detail Pane Access Logs ---
     async function loadItemAuditLogs(itemId) {
         const detailAccessLogs = document.getElementById('detailAccessLogs');
@@ -504,17 +506,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
             console.error('Failed to load item audit logs', e);
         }
-    }
-
-    // Wrap showDetail to load logs
-    const originalShowDetail = window.showDetail;
-    window.showDetail = function(item) {
-        document.getElementById('detailOwner').textContent = item.owner;
-        document.getElementById('detailScope').textContent = item.scope;
-        document.getElementById('detailType').textContent = item.item_type;
-        detailPane.classList.add('active');
-        detailPane.dataset.itemId = item.id;
-        loadItemAuditLogs(item.id);
     }
 
     // --- People View ---
@@ -550,12 +541,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (link.dataset.view === 'people') loadPeople();
-        });
-    });
-
     // --- Logout ---
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'btn btn-outline-danger btn-sm w-100 mt-2';
@@ -565,3 +550,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res.ok) window.location.reload();
     };
     document.querySelector('.sidebar-footer').appendChild(logoutBtn);
+
+    // --- Init ---
+    checkAuth();
+});

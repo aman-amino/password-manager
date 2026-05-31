@@ -174,13 +174,13 @@
 
             <section class="controls-panel" id="vaultControls">
                 <div class="search-bar">
-                    <input type="text" class="form-control" placeholder="Search secrets, tags, metadata...">
+                    <input type="text" id="vault-search" class="form-control" placeholder="Search secrets, tags, metadata..." aria-label="Search secrets">
                 </div>
                 <div class="filter-chips">
-                    <button class="filter-chip active">All</button>
-                    <button class="filter-chip">Personal</button>
-                    <button class="filter-chip">Department</button>
-                    <button class="filter-chip">Organization</button>
+                    <button class="filter-chip active" id="filter-all" aria-pressed="true">All</button>
+                    <button class="filter-chip" id="filter-personal" aria-pressed="false">Personal</button>
+                    <button class="filter-chip" id="filter-dept" aria-pressed="false">Department</button>
+                    <button class="filter-chip" id="filter-org" aria-pressed="false">Organization</button>
                 </div>
             </section>
 
