@@ -1,3 +1,4 @@
+import base64
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import VaultItem, AuditEvent, AccessGrant
@@ -27,7 +28,6 @@ class VaultItemSerializer(serializers.ModelSerializer):
 
     def validate_encrypted_blob(self, value):
         if isinstance(value, str):
-            import base64
             value = base64.b64decode(value)
         MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
@@ -36,7 +36,6 @@ class VaultItemSerializer(serializers.ModelSerializer):
 
     def validate_nonce(self, value):
         if isinstance(value, str):
-            import base64
             value = base64.b64decode(value)
         return value
 
@@ -60,7 +59,6 @@ class VaultItemSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        import base64
         if ret.get('encrypted_blob'):
             ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
         if ret.get('nonce'):
