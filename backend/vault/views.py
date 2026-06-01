@@ -53,6 +53,8 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
+        # Optimization: select_related("actor") is needed for StringRelatedField.
+        # "organization" is serialized as PK, so join is not strictly necessary but kept if needed for filtering.
         qs = AuditEvent.objects.select_related("actor", "organization").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
