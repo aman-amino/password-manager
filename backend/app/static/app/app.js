@@ -344,10 +344,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('vault-search');
     const filterChips = document.querySelectorAll('.filter-chip');
 
+    // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     if (searchInput) {
-        searchInput.addEventListener('input', () => {
+        searchInput.addEventListener('input', debounce(() => {
             renderVault();
-        });
+        }, 250));
     }
 
     filterChips.forEach(chip => {
