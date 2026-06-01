@@ -43,17 +43,17 @@
         <section class="panel">
           <div class="panel-header">
             <div class="search">
-              <input class="form-control" placeholder="Search secrets, tags, users" aria-label="Search secrets, tags, and users">
+              <input id="vault-search" class="form-control" placeholder="Search secrets, tags, users" aria-label="Search secrets, tags, and users">
             </div>
             <div class="filters">
-              <button class="btn btn-sm btn-outline-secondary">All</button>
-              <button class="btn btn-sm btn-outline-secondary">Personal</button>
-              <button class="btn btn-sm btn-outline-secondary">Dept</button>
-              <button class="btn btn-sm btn-outline-secondary">Org</button>
+              <button id="filter-all" class="btn btn-sm btn-outline-secondary active" aria-pressed="true" data-filter="all">All</button>
+              <button id="filter-personal" class="btn btn-sm btn-outline-secondary" aria-pressed="false" data-filter="personal">Personal</button>
+              <button id="filter-dept" class="btn btn-sm btn-outline-secondary" aria-pressed="false" data-filter="dept">Dept</button>
+              <button id="filter-org" class="btn btn-sm btn-outline-secondary" aria-pressed="false" data-filter="org">Org</button>
             </div>
           </div>
           <div class="panel-body">
-            <div class="vault-grid">
+            <div id="vault-grid" class="vault-grid">
               <div class="vault-card">
                 <div class="card-title">Prod Admin</div>
                 <div class="card-meta">Org · Updated 2h ago</div>

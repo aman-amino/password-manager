@@ -71,12 +71,11 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Optimization: Use select_related to avoid N+1 query bottlenecks during serialization
-        return AccessGrant.objects.select_related(
-            "grantee", "vault_item", "granted_by"
-        ).filter(
-            Q(grantee=user, is_active=True) | Q(granted_by=user)
-        )
+        # Use select_related to optimize retrieval of related fields and avoid N+1 queries during serialization.
+        return (
+            AccessGrant.objects.filter(grantee=user, is_active=True)
+            | AccessGrant.objects.filter(granted_by=user)
+        ).select_related("grantee", "vault_item", "granted_by")
 
     def perform_create(self, serializer):
         instance = serializer.save()
