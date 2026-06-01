@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -22,7 +23,8 @@ class VaultItemViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        return vault_item_queryset_for_user(self.request.user).select_related("owner", "organization", "department")
+        # Optimization: Only select 'owner' as 'organization' and 'department' are rendered as IDs in the serializer
+        return vault_item_queryset_for_user(self.request.user).select_related("owner")
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -59,7 +61,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user.role == User.Role.SUPERADMIN:
             return qs.order_by("-created_at")
-        if user.organization:
+        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization:
             return qs.filter(organization=user.organization).order_by("-created_at")
         return qs.filter(actor=user).order_by("-created_at")
 
