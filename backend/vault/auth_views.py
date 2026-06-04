@@ -90,7 +90,8 @@ class UserViewSet(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        users = User.objects.all()
+        # Bolt optimization: use select_related to avoid N+1 queries when accessing organization and department names.
+        users = User.objects.select_related('organization', 'department').all()
         if request.user.organization:
             users = users.filter(organization=request.user.organization)
 
