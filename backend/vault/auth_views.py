@@ -90,9 +90,10 @@ class UserViewSet(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        users = User.objects.all()
-        if request.user.organization:
-            users = users.filter(organization=request.user.organization)
+        # Optimization: select_related reduces O(N) queries to O(1) by joining organization and department.
+        users = User.objects.select_related("organization", "department").all()
+        if request.user.organization_id:
+            users = users.filter(organization_id=request.user.organization_id)
 
         data = []
         for u in users:

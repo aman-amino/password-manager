@@ -270,7 +270,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         newSecretForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const saveBtn = document.getElementById('saveSecretBtn');
+            const originalBtnText = saveBtn.innerHTML;
+
+            // Palette: Provide visual feedback during the async save operation
             saveBtn.disabled = true;
+            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...`;
 
             const title = document.getElementById('secretTitle').value;
             const plaintext = document.getElementById('secretValue').value;
@@ -308,7 +312,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error(err);
                 alert(err.message);
             } finally {
+                // Restore button state
                 saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnText;
             }
         });
     }
