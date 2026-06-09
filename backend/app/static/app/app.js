@@ -298,7 +298,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         newSecretForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const saveBtn = document.getElementById('saveSecretBtn');
+            const spinner = saveBtn.querySelector('.spinner-border');
+            const btnText = saveBtn.querySelector('.btn-text');
+
             saveBtn.disabled = true;
+            if (spinner) spinner.classList.remove('d-none');
+            if (btnText) btnText.textContent = 'Saving...';
 
             const title = document.getElementById('secretTitle').value;
             const plaintext = document.getElementById('secretValue').value;
@@ -337,6 +342,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert(err.message);
             } finally {
                 saveBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Save Secret';
             }
         });
     }
