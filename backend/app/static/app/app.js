@@ -213,29 +213,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             return matchesSearch && matchesFilter;
         });
 
+        if (filtered.length === 0) {
+            vaultGrid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="text-muted mb-3">
+                        <span class="material-icons" style="font-size: 48px;">inventory_2</span>
+                    </div>
+                    <h5 class="text-muted">No secrets found</h5>
+                    <p class="text-muted small">Try adjusting your search or filter</p>
+                </div>
+            `;
+            document.getElementById('itemCount').textContent = `0 Secrets`;
+            return;
+        }
+
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 
-        filtered.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'vault-card';
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="card-title-group">
-                        <h3 class="h6 mb-0">${item.title}</h3>
-                        <div class="text-muted small">Updated ${new Date(item.updated_at).toLocaleDateString()}</div>
-                    </div>
+        if (filtered.length === 0) {
+            // Palette UX improvement: show a user-friendly empty state when no secrets match filters/search
+            const emptyState = document.createElement('div');
+            emptyState.className = 'col-12 text-center py-5 opacity-75';
+            emptyState.innerHTML = `
+                <div class="mb-3">
+                    <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">inventory_2</span>
                 </div>
-                <div class="card-tags">
-                    <span class="tag">${item.scope}</span>
-                </div>
-                <div class="card-footer">
-                    <div class="password-mask">••••••••••••</div>
-                </div>
+                <h5 class="text-muted">No secrets found</h5>
+                <p class="small text-muted">Try adjusting your filters or search terms.</p>
             `;
-            card.addEventListener('click', () => showDetail(item));
-            fragment.appendChild(card);
-        });
+            fragment.appendChild(emptyState);
+        } else {
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'vault-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <h3 class="h6 mb-0">${item.title}</h3>
+                            <div class="text-muted small">Updated ${new Date(item.updated_at).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div class="card-tags">
+                        <span class="tag">${item.scope}</span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="password-mask">••••••••••••</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => showDetail(item));
+                fragment.appendChild(card);
+            });
+        }
         vaultGrid.appendChild(fragment);
         document.getElementById('itemCount').textContent = `${filtered.length} Secrets`;
     }
@@ -351,10 +379,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('vault-search');
     const filterChips = document.querySelectorAll('.filter-chip');
 
+    // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     if (searchInput) {
-        searchInput.addEventListener('input', () => {
+        searchInput.addEventListener('input', debounce(() => {
             renderVault();
-        });
+        }, 250));
     }
 
     filterChips.forEach(chip => {
