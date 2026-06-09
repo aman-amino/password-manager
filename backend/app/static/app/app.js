@@ -213,6 +213,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             return matchesSearch && matchesFilter;
         });
 
+        if (filtered.length === 0) {
+            vaultGrid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="text-muted mb-3">
+                        <span class="material-icons" style="font-size: 48px;">inventory_2</span>
+                    </div>
+                    <h5 class="text-muted">No secrets found</h5>
+                    <p class="text-muted small">Try adjusting your search or filter</p>
+                </div>
+            `;
+            document.getElementById('itemCount').textContent = `0 Secrets`;
+            return;
+        }
+
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 
@@ -358,10 +372,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('vault-search');
     const filterChips = document.querySelectorAll('.filter-chip');
 
+    // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     if (searchInput) {
-        searchInput.addEventListener('input', () => {
+        searchInput.addEventListener('input', debounce(() => {
             renderVault();
-        });
+        }, 250));
     }
 
     filterChips.forEach(chip => {

@@ -6,6 +6,6 @@
 **Learning:** Users with many vault items benefit significantly from instant, client-side filtering that doesn't require server round-trips. Using ARIA attributes like `aria-pressed` on filter buttons also ensures the UI state is communicated to assistive technologies.
 **Action:** Implemented client-side search and scope-based filtering in `frontend/app.js` and added `aria-pressed` states to filter buttons.
 
-## 2026-06-04 - User-Friendly Empty States
-**Learning:** A blank screen during filtered searches or in an empty vault provides poor feedback and can be mistaken for a loading failure or application bug. Providing a visual anchor (icon) and clear instructions improves perceived reliability.
-**Action:** Added a "No secrets found" empty state to the `renderVault` function in `app.js`, including a material icon and guidance for the user.
+## 2026-02-12 - User-Friendly Vault Empty State
+**Learning:** A blank screen when no vault items match search or filters provides poor feedback. An explicit "No secrets found" message with an icon improves user confidence and provides clear instruction.
+**Action:** Implemented an empty state in the `renderVault` function in `backend/app/static/app/app.js`.
