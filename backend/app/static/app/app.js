@@ -341,6 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error(err);
                 alert(err.message);
             } finally {
+                // Restore button state
                 saveBtn.disabled = false;
                 if (spinner) spinner.classList.add('d-none');
                 if (btnText) btnText.textContent = 'Save Secret';
