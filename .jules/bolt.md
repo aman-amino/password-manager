@@ -6,6 +6,6 @@
 **Learning:** Identified N+1 query patterns in `AccessGrantViewSet` due to missing `select_related` on related users and vault items. Also noticed repeated import overhead in `VaultItemSerializer` by importing `base64` inside method scopes.
 **Action:** Added `select_related("grantee", "vault_item", "granted_by")` to the queryset and moved `base64` import to module level.
 
-## 2026-05-15 - User List Query Optimization
-**Learning:** `UserViewSet.get` was suffering from an O(N) database query pattern because it accessed `u.organization.name` and `u.department.name` for every user in a loop without prefetching those relations.
-**Action:** Added `select_related('organization', 'department')` to the queryset, reducing database round-trips to O(1).
+## 2026-02-12 - User List Query Optimization
+**Learning:** The user list endpoint was susceptible to N+1 queries when accessing organization and department names during serialization.
+**Action:** Added `select_related('organization', 'department')` to the `UserViewSet.get` method in `backend/vault/auth_views.py`.

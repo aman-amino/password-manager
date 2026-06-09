@@ -90,19 +90,19 @@ class UserViewSet(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Optimization: select_related fetches organization and department in the same query
-        # to avoid N+1 issues when accessing u.organization.name and u.department.name in the loop.
+        # Bolt Optimization: Added select_related to eliminate N+1 query bottlenecks for organization and department names.
         users = User.objects.select_related('organization', 'department').all()
         if request.user.organization:
             users = users.filter(organization=request.user.organization)
 
-        data = []
-        for u in users:
-            data.append({
+        data = [
+            {
                 "username": u.username,
                 "email": u.email,
                 "role": u.role,
                 "organization": u.organization.name if u.organization else None,
                 "department": u.department.name if u.department else None
-            })
+            }
+            for u in users
+        ]
         return Response(data)

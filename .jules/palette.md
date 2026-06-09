@@ -6,6 +6,6 @@
 **Learning:** Users with many vault items benefit significantly from instant, client-side filtering that doesn't require server round-trips. Using ARIA attributes like `aria-pressed` on filter buttons also ensures the UI state is communicated to assistive technologies.
 **Action:** Implemented client-side search and scope-based filtering in `frontend/app.js` and added `aria-pressed` states to filter buttons.
 
-## 2026-05-15 - Visual Feedback for Async Actions
-**Learning:** Providing immediate visual feedback (like spinners and "Saving..." labels) during asynchronous operations prevents user frustration and potential double-submissions, while making the app feel more responsive.
-**Action:** Added a Bootstrap spinner and stateful text to the "Save Secret" button, managed via a `finally` block in JavaScript for robustness.
+## 2026-02-12 - User-Friendly Vault Empty State
+**Learning:** A blank screen when no vault items match search or filters provides poor feedback. An explicit "No secrets found" message with an icon improves user confidence and provides clear instruction.
+**Action:** Implemented an empty state in the `renderVault` function in `backend/app/static/app/app.js`.
