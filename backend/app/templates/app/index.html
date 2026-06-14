@@ -271,8 +271,15 @@
                     <ul class="access-list" id="detailAccessLogs">
                     </ul>
                 </div>
+                <div class="detail-section d-none" id="decryptedSection">
+                    <label class="label-sm">DECRYPTED VALUE</label>
+                    <div class="input-group mb-3">
+                        <input type="text" id="decryptedValueInput" class="form-control bg-dark text-white border-secondary" readonly>
+                        <button class="btn btn-outline-teal" type="button" id="copySecretBtn">Copy</button>
+                    </div>
+                </div>
                 <div class="detail-actions mt-auto">
-                    <button class="btn btn-primary w-100 mb-2">Decrypt & Show</button>
+                    <button class="btn btn-primary w-100 mb-2" id="decryptBtn">Decrypt & Show</button>
                     <button class="btn btn-outline-secondary w-100">Share Access</button>
                 </div>
             </div>
