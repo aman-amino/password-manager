@@ -9,3 +9,7 @@
 ## 2026-02-12 - User List Query Optimization
 **Learning:** The user list endpoint was susceptible to N+1 queries when accessing organization and department names during serialization.
 **Action:** Added `select_related('organization', 'department')` to the `UserViewSet.get` method in `backend/vault/auth_views.py`.
+
+## 2026-06-15 - DOM Reflow Optimization with DocumentFragment
+**Learning:** Rendering large lists (audit logs, user lists, etc.) using repeated `appendChild` on a live DOM element causes excessive browser reflows and repaints.
+**Action:** Refactored list rendering functions in `app.js` to use `DocumentFragment` to batch DOM updates.

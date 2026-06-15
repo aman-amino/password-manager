@@ -274,6 +274,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailType').textContent = item.item_type;
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
+
+        // Reset decryption UI
+        const decryptedSection = document.getElementById('decryptedSection');
+        if (decryptedSection) decryptedSection.classList.add('d-none');
+        const decryptedInput = document.getElementById('decryptedValueInput');
+        if (decryptedInput) decryptedInput.value = '';
+
         loadItemAuditLogs(item.id);
     }
 
@@ -350,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Decrypt & Show ---
-    const decryptBtn = document.querySelector('.detail-actions .btn-primary');
+    const decryptBtn = document.getElementById('decryptBtn');
 
     if (decryptBtn) {
         decryptBtn.addEventListener('click', async () => {
@@ -360,18 +367,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             const item = secrets.find(s => s.id == itemId);
             if (!item) return;
 
+            const spinner = decryptBtn.querySelector('.spinner-border');
+            const btnText = decryptBtn.querySelector('.btn-text');
+
             try {
                 if (!masterKey) throw new Error('Master key not found. Please re-login.');
+
+                decryptBtn.disabled = true;
+                if (spinner) spinner.classList.remove('d-none');
+                if (btnText) btnText.textContent = 'Decrypting...';
 
                 const ciphertext = crypto.fromBase64(item.encrypted_blob);
                 const nonce = crypto.fromBase64(item.nonce);
                 const decryptedBytes = await crypto.decryptAesGcm(masterKey, ciphertext, nonce);
                 const plaintext = crypto.utf8Decode(decryptedBytes);
 
-                alert('Decrypted Value: ' + plaintext);
+                // Palette UX improvement: show the value in the UI instead of an alert()
+                const decryptedSection = document.getElementById('decryptedSection');
+                const decryptedInput = document.getElementById('decryptedValueInput');
+                if (decryptedSection && decryptedInput) {
+                    decryptedInput.value = plaintext;
+                    decryptedSection.classList.remove('d-none');
+                }
             } catch (err) {
                 console.error(err);
                 alert('Decryption failed: ' + err.message);
+            } finally {
+                decryptBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Decrypt & Show';
+            }
+        });
+    }
+
+    // --- Copy to Clipboard ---
+    const copySecretBtn = document.getElementById('copySecretBtn');
+    if (copySecretBtn) {
+        copySecretBtn.addEventListener('click', async () => {
+            const input = document.getElementById('decryptedValueInput');
+            if (!input || !input.value) return;
+
+            try {
+                await navigator.clipboard.writeText(input.value);
+                const originalText = copySecretBtn.textContent;
+                copySecretBtn.textContent = 'Copied!';
+                copySecretBtn.classList.remove('btn-outline-teal');
+                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
+
+                setTimeout(() => {
+                    copySecretBtn.textContent = originalText;
+                    copySecretBtn.classList.remove('btn-teal');
+                    copySecretBtn.classList.add('btn-outline-teal');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy!', err);
             }
         });
     }
@@ -410,7 +459,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Admin ---
     if (rotateAdminBtn) {
         rotateAdminBtn.addEventListener('click', async () => {
+            const originalText = rotateAdminBtn.textContent;
             try {
+                rotateAdminBtn.disabled = true;
+                rotateAdminBtn.textContent = 'Rotating...';
+
                 const response = await fetch('/rotate-admin/', {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -423,6 +476,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                rotateAdminBtn.disabled = false;
+                rotateAdminBtn.textContent = originalText;
             }
         });
     }
@@ -484,6 +540,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
+
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
+                const fragment = document.createDocumentFragment();
                 received.forEach(g => {
                     const card = document.createElement('div');
                     card.className = 'request-card';
@@ -496,8 +555,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="btn btn-sm btn-outline-success" onclick="alert('Access already active. Check your vault.')">View</button>
                         </div>
                     `;
-                    requestList.appendChild(card);
+                    fragment.appendChild(card);
                 });
+                requestList.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load requests', e);
@@ -514,6 +574,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 auditLogBody.innerHTML = '';
+
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
+                const fragment = document.createDocumentFragment();
                 logs.forEach(log => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -523,8 +586,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td>${log.target_type}: ${log.target_id}</td>
                         <td>${log.ip_address || '-'}</td>
                     `;
-                    auditLogBody.appendChild(row);
+                    fragment.appendChild(row);
                 });
+                auditLogBody.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load audit logs', e);
@@ -541,12 +605,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 detailAccessLogs.innerHTML = '';
+
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
+                const fragment = document.createDocumentFragment();
                 logs.slice(0, 5).forEach(log => {
                     const li = document.createElement('li');
                     li.className = 'small text-muted mb-1';
                     li.textContent = `${new Date(log.created_at).toLocaleDateString()} - ${log.actor} (${log.action})`;
-                    detailAccessLogs.appendChild(li);
+                    fragment.appendChild(li);
                 });
+                detailAccessLogs.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load item audit logs', e);
@@ -563,6 +631,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const users = await res.json();
                 peopleList.innerHTML = '';
+
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
+                const fragment = document.createDocumentFragment();
                 users.forEach(u => {
                     const col = document.createElement('div');
                     col.className = 'col-md-4 mb-3';
@@ -578,8 +649,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         </div>
                     `;
-                    peopleList.appendChild(col);
+                    fragment.appendChild(col);
                 });
+                peopleList.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load people', e);

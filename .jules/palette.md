@@ -9,3 +9,7 @@
 ## 2026-02-12 - User-Friendly Vault Empty State
 **Learning:** A blank screen when no vault items match search or filters provides poor feedback. An explicit "No secrets found" message with an icon improves user confidence and provides clear instruction.
 **Action:** Implemented an empty state in the `renderVault` function in `backend/app/static/app/app.js`.
+
+## 2026-06-15 - Modernized Decryption Flow and Clipboard Feedback
+**Learning:** Using `alert()` for displaying sensitive decrypted secrets is a poor UX pattern that lacks professional polish and "Copy" functionality.
+**Action:** Implemented an in-UI decryption section with a read-only input and a "Copy" button featuring 'Copied!' state feedback.
