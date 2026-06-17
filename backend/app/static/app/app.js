@@ -274,11 +274,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailType').textContent = item.item_type;
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
+
+        // Palette UX Improvement: Reset decryption section when showing new item
+        const decryptedSection = document.getElementById('decryptedSection');
+        const decryptedInput = document.getElementById('decryptedValueInput');
+        if (decryptedSection && decryptedInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedInput.value = '';
+        }
+
         loadItemAuditLogs(item.id);
     }
 
     closePaneBtn.addEventListener('click', () => {
         detailPane.classList.remove('active');
+        // Palette UX Improvement: Clear decrypted state on close
+        const decryptedSection = document.getElementById('decryptedSection');
+        const decryptedInput = document.getElementById('decryptedValueInput');
+        if (decryptedSection && decryptedInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedInput.value = '';
+        }
     });
 
     // --- New Secret ---
@@ -350,7 +366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Decrypt & Show ---
-    const decryptBtn = document.querySelector('.detail-actions .btn-primary');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const copySecretBtn = document.getElementById('copySecretBtn');
 
     if (decryptBtn) {
         decryptBtn.addEventListener('click', async () => {
@@ -368,10 +385,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const decryptedBytes = await crypto.decryptAesGcm(masterKey, ciphertext, nonce);
                 const plaintext = crypto.utf8Decode(decryptedBytes);
 
-                alert('Decrypted Value: ' + plaintext);
+                // Palette UX Improvement: Show decrypted value in inline section instead of alert()
+                const decryptedSection = document.getElementById('decryptedSection');
+                const decryptedInput = document.getElementById('decryptedValueInput');
+                if (decryptedSection && decryptedInput) {
+                    decryptedInput.value = plaintext;
+                    decryptedSection.classList.remove('d-none');
+                }
             } catch (err) {
                 console.error(err);
                 alert('Decryption failed: ' + err.message);
+            }
+        });
+    }
+
+    if (copySecretBtn) {
+        copySecretBtn.addEventListener('click', async () => {
+            const decryptedInput = document.getElementById('decryptedValueInput');
+            if (!decryptedInput || !decryptedInput.value) return;
+
+            try {
+                await navigator.clipboard.writeText(decryptedInput.value);
+
+                // Palette UX: Visual feedback for copy
+                const originalHTML = copySecretBtn.innerHTML;
+                copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
+                copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
+
+                setTimeout(() => {
+                    copySecretBtn.innerHTML = originalHTML;
+                    copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
             }
         });
     }
@@ -484,6 +530,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
+                const fragment = document.createDocumentFragment();
                 received.forEach(g => {
                     const card = document.createElement('div');
                     card.className = 'request-card';
@@ -496,8 +545,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="btn btn-sm btn-outline-success" onclick="alert('Access already active. Check your vault.')">View</button>
                         </div>
                     `;
-                    requestList.appendChild(card);
+                    fragment.appendChild(card);
                 });
+                requestList.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load requests', e);
@@ -514,6 +564,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 auditLogBody.innerHTML = '';
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
+                const fragment = document.createDocumentFragment();
                 logs.forEach(log => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -523,8 +576,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td>${log.target_type}: ${log.target_id}</td>
                         <td>${log.ip_address || '-'}</td>
                     `;
-                    auditLogBody.appendChild(row);
+                    fragment.appendChild(row);
                 });
+                auditLogBody.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load audit logs', e);
@@ -541,12 +595,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 detailAccessLogs.innerHTML = '';
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
+                const fragment = document.createDocumentFragment();
                 logs.slice(0, 5).forEach(log => {
                     const li = document.createElement('li');
                     li.className = 'small text-muted mb-1';
                     li.textContent = `${new Date(log.created_at).toLocaleDateString()} - ${log.actor} (${log.action})`;
-                    detailAccessLogs.appendChild(li);
+                    fragment.appendChild(li);
                 });
+                detailAccessLogs.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load item audit logs', e);
@@ -563,6 +621,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const users = await res.json();
                 peopleList.innerHTML = '';
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
+                const fragment = document.createDocumentFragment();
                 users.forEach(u => {
                     const col = document.createElement('div');
                     col.className = 'col-md-4 mb-3';
@@ -578,8 +639,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         </div>
                     `;
-                    peopleList.appendChild(col);
+                    fragment.appendChild(col);
                 });
+                peopleList.appendChild(fragment);
             }
         } catch (e) {
             console.error('Failed to load people', e);
