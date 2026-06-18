@@ -9,3 +9,7 @@
 ## 2026-02-12 - User List Query Optimization
 **Learning:** The user list endpoint was susceptible to N+1 queries when accessing organization and department names during serialization.
 **Action:** Added `select_related('organization', 'department')` to the `UserViewSet.get` method in `backend/vault/auth_views.py`.
+
+## 2026-06-17 - ForeignKey ID Optimization in Filters
+**Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
+**Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.

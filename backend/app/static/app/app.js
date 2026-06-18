@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadItemAuditLogs(item.id);
     }
 
-    closePaneBtn.addEventListener('click', () => {
+    function closeDetailPane() {
         detailPane.classList.remove('active');
         // Palette UX Improvement: Clear decrypted state on close
         const decryptedSection = document.getElementById('decryptedSection');
@@ -294,6 +294,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (decryptedSection && decryptedInput) {
             decryptedSection.classList.add('d-none');
             decryptedInput.value = '';
+        }
+    }
+
+    closePaneBtn.addEventListener('click', closeDetailPane);
+
+    // Palette UX Improvement: Close detail pane with Escape key for better keyboard accessibility.
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && detailPane.classList.contains('active')) {
+            closeDetailPane();
         }
     });
 
