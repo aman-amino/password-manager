@@ -115,7 +115,8 @@ def vault_item_queryset_for_user(user: User):
         Q(expires_at__isnull=True) | Q(expires_at__gt=now)
     )
 
-    base = VaultItem.objects.filter(is_deleted=False, organization=user.organization)
+    # Bolt Optimization: Use organization_id and department_id to avoid unnecessary database lookups for related objects.
+    base = VaultItem.objects.filter(is_deleted=False, organization_id=user.organization_id)
 
     if user.role == User.Role.ADMIN:
         # Admins see everything in org except other's personal items, PLUS grants
@@ -128,7 +129,7 @@ def vault_item_queryset_for_user(user: User):
         return base.filter(
             Q(owner=user) |
             Exists(active_grants) |
-            (Q(department=user.department) & Q(scope=VaultItem.Scope.DEPT))
+            (Q(department_id=user.department_id) & Q(scope=VaultItem.Scope.DEPT))
         )
 
     # regular user

@@ -10,6 +10,6 @@
 **Learning:** A blank screen when no vault items match search or filters provides poor feedback. An explicit "No secrets found" message with an icon improves user confidence and provides clear instruction.
 **Action:** Implemented an empty state in the `renderVault` function in `backend/app/static/app/app.js`.
 
-## 2026-06-15 - Modernized Decryption Flow and Clipboard Feedback
-**Learning:** Using `alert()` for displaying sensitive decrypted secrets is a poor UX pattern that lacks professional polish and "Copy" functionality.
-**Action:** Implemented an in-UI decryption section with a read-only input and a "Copy" button featuring 'Copied!' state feedback.
+## 2026-06-17 - Keyboard Accessibility for Detail Panes
+**Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
+**Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
