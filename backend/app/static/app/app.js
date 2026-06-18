@@ -393,8 +393,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const item = secrets.find(s => s.id == itemId);
             if (!item) return;
 
+            const spinner = decryptBtn.querySelector('.spinner-border');
+            const btnText = decryptBtn.querySelector('.btn-text');
+
             try {
                 if (!masterKey) throw new Error('Master key not found. Please re-login.');
+
+                decryptBtn.disabled = true;
+                if (spinner) spinner.classList.remove('d-none');
+                if (btnText) btnText.textContent = 'Decrypting...';
 
                 const ciphertext = crypto.fromBase64(item.encrypted_blob);
                 const nonce = crypto.fromBase64(item.nonce);
@@ -411,6 +418,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error(err);
                 alert('Decryption failed: ' + err.message);
+            } finally {
+                decryptBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Decrypt & Show';
+            }
+        });
+    }
+
+    // --- Copy to Clipboard ---
+    const copySecretBtn = document.getElementById('copySecretBtn');
+    if (copySecretBtn) {
+        copySecretBtn.addEventListener('click', async () => {
+            const input = document.getElementById('decryptedValueInput');
+            if (!input || !input.value) return;
+
+            try {
+                await navigator.clipboard.writeText(input.value);
+                const originalText = copySecretBtn.textContent;
+                copySecretBtn.textContent = 'Copied!';
+                copySecretBtn.classList.remove('btn-outline-teal');
+                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
+
+                setTimeout(() => {
+                    copySecretBtn.textContent = originalText;
+                    copySecretBtn.classList.remove('btn-teal');
+                    copySecretBtn.classList.add('btn-outline-teal');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy!', err);
             }
         });
     }
@@ -472,7 +508,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Admin ---
     if (rotateAdminBtn) {
         rotateAdminBtn.addEventListener('click', async () => {
+            const originalText = rotateAdminBtn.textContent;
             try {
+                rotateAdminBtn.disabled = true;
+                rotateAdminBtn.textContent = 'Rotating...';
+
                 const response = await fetch('/rotate-admin/', {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCsrfToken() }
@@ -485,6 +525,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                rotateAdminBtn.disabled = false;
+                rotateAdminBtn.textContent = originalText;
             }
         });
     }
