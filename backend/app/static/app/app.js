@@ -272,6 +272,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailOwner').textContent = item.owner;
         document.getElementById('detailScope').textContent = item.scope;
         document.getElementById('detailType').textContent = item.item_type;
+
+        // Palette UX Improvement: Clear previous decryption state
+        const decryptedValueInput = document.getElementById('decryptedValueInput');
+        const decryptedSection = document.getElementById('decryptedSection');
+        if (decryptedValueInput) decryptedValueInput.value = '';
+        if (decryptedSection) decryptedSection.classList.add('d-none');
+
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
 
