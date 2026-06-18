@@ -281,11 +281,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
+
+        // Palette UX Improvement: Reset decryption section when showing new item
+        const decryptedSection = document.getElementById('decryptedSection');
+        const decryptedInput = document.getElementById('decryptedValueInput');
+        if (decryptedSection && decryptedInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedInput.value = '';
+        }
+
         loadItemAuditLogs(item.id);
     }
 
-    closePaneBtn.addEventListener('click', () => {
+    function closeDetailPane() {
         detailPane.classList.remove('active');
+        // Palette UX Improvement: Clear decrypted state on close
+        const decryptedSection = document.getElementById('decryptedSection');
+        const decryptedInput = document.getElementById('decryptedValueInput');
+        if (decryptedSection && decryptedInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedInput.value = '';
+        }
+    }
+
+    closePaneBtn.addEventListener('click', closeDetailPane);
+
+    // Palette UX Improvement: Close detail pane with Escape key for better keyboard accessibility.
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && detailPane.classList.contains('active')) {
+            closeDetailPane();
+        }
     });
 
     // --- New Secret ---
@@ -376,11 +401,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const decryptedBytes = await crypto.decryptAesGcm(masterKey, ciphertext, nonce);
                 const plaintext = crypto.utf8Decode(decryptedBytes);
 
-                // Palette UX improvement: show decrypted secret in-UI instead of alert()
-                const decryptedValueInput = document.getElementById('decryptedValueInput');
+                // Palette UX Improvement: Show decrypted value in inline section instead of alert()
                 const decryptedSection = document.getElementById('decryptedSection');
-                if (decryptedValueInput && decryptedSection) {
-                    decryptedValueInput.value = plaintext;
+                const decryptedInput = document.getElementById('decryptedValueInput');
+                if (decryptedSection && decryptedInput) {
+                    decryptedInput.value = plaintext;
                     decryptedSection.classList.remove('d-none');
                 }
             } catch (err) {
@@ -391,16 +416,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', () => {
-            const input = document.getElementById('decryptedValueInput');
-            if (input && input.value) {
-                navigator.clipboard.writeText(input.value).then(() => {
-                    const originalText = copySecretBtn.textContent;
-                    copySecretBtn.textContent = 'Copied!';
-                    setTimeout(() => {
-                        copySecretBtn.textContent = originalText;
-                    }, 2000);
-                });
+        copySecretBtn.addEventListener('click', async () => {
+            const decryptedInput = document.getElementById('decryptedValueInput');
+            if (!decryptedInput || !decryptedInput.value) return;
+
+            try {
+                await navigator.clipboard.writeText(decryptedInput.value);
+
+                // Palette UX: Visual feedback for copy
+                const originalHTML = copySecretBtn.innerHTML;
+                copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
+                copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
+
+                setTimeout(() => {
+                    copySecretBtn.innerHTML = originalHTML;
+                    copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
             }
         });
     }
@@ -513,8 +546,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
-
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();
                 received.forEach(g => {
                     const card = document.createElement('div');
@@ -547,8 +580,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 auditLogBody.innerHTML = '';
-
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();
                 logs.forEach(log => {
                     const row = document.createElement('tr');
@@ -578,8 +611,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const logs = await res.json();
                 detailAccessLogs.innerHTML = '';
-
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();
                 logs.slice(0, 5).forEach(log => {
                     const li = document.createElement('li');
@@ -604,8 +637,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (res.ok) {
                 const users = await res.json();
                 peopleList.innerHTML = '';
-
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates
+                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+                // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();
                 users.forEach(u => {
                     const col = document.createElement('div');

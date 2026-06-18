@@ -427,6 +427,7 @@ body {
 .text-teal { color: #009688; }
 .btn-outline-teal { border-color: #009688; color: #009688; }
 .btn-outline-teal:hover { background-color: #009688; color: white; }
+.btn-teal { background-color: #009688; color: white; border-color: #009688; }
 
 /* Detail Pane Active */
 .detail-pane {
