@@ -51,10 +51,12 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Bolt Optimization: Use organization_id and department_id from the request user object
+        # to avoid redundant database lookups for these related objects during creation.
         user = self.context["request"].user
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
 
     def to_representation(self, instance):

@@ -13,3 +13,7 @@
 ## 2026-06-17 - ForeignKey ID Optimization in Filters
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
+
+## 2026-06-19 - ForeignKey ID Optimization in Writes and Utilities
+**Learning:** Directly assigning `_id` suffixes for foreign keys in `ModelSerializer.create` or model utility functions avoids redundant database queries to fetch the full object, which is particularly effective for high-frequency operations like audit logging.
+**Action:** Updated `log_audit_event` and `VaultItemSerializer.create` to use `organization_id` and `department_id`.
