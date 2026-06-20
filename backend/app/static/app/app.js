@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginTab.classList.add('active');
         registerTab.classList.remove('active');
         emailGroup.classList.add('d-none');
-        authSubmit.textContent = 'Sign In';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Sign In';
+        else authSubmit.textContent = 'Sign In';
         authError.classList.add('d-none');
     });
 
@@ -72,14 +74,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         registerTab.classList.add('active');
         loginTab.classList.remove('active');
         emailGroup.classList.remove('d-none');
-        authSubmit.textContent = 'Create Account';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Create Account';
+        else authSubmit.textContent = 'Create Account';
         authError.classList.add('d-none');
     });
 
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         authError.classList.add('d-none');
+
+        const spinner = authSubmit.querySelector('.spinner-border');
+        const btnText = authSubmit.querySelector('.btn-text');
+
         authSubmit.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        if (btnText) btnText.textContent = isRegister ? 'Creating...' : 'Signing In...';
 
         const username = authUsername.value;
         const password = authPassword.value;
@@ -152,6 +162,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             authError.classList.remove('d-none');
         } finally {
             authSubmit.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
+            if (btnText) btnText.textContent = isRegister ? 'Create Account' : 'Sign In';
         }
     });
 
@@ -435,29 +447,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 await navigator.clipboard.writeText(input.value);
-                const originalText = copySecretBtn.textContent;
-                copySecretBtn.textContent = 'Copied!';
-                copySecretBtn.classList.remove('btn-outline-teal');
-                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
-
-                setTimeout(() => {
-                    copySecretBtn.textContent = originalText;
-                    copySecretBtn.classList.remove('btn-teal');
-                    copySecretBtn.classList.add('btn-outline-teal');
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
-        });
-    }
-
-    if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', async () => {
-            const decryptedInput = document.getElementById('decryptedValueInput');
-            if (!decryptedInput || !decryptedInput.value) return;
-
-            try {
-                await navigator.clipboard.writeText(decryptedInput.value);
 
                 // Palette UX: Visual feedback for copy
                 const originalHTML = copySecretBtn.innerHTML;
@@ -469,7 +458,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
                 }, 2000);
             } catch (err) {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy!', err);
             }
         });
     }
