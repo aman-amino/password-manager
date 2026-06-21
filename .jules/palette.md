@@ -13,3 +13,7 @@
 ## 2026-06-17 - Keyboard Accessibility for Detail Panes
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
+
+## 2026-06-21 - Asynchronous Feedback in Auth UI
+**Learning:** Providing immediate visual feedback during multi-stage asynchronous operations (like PBKDF2 derivation followed by API requests) improves perceived performance and reduces user anxiety. Loading spinners and context-aware button text ("Signing In...") are effective patterns for this.
+**Action:** Added loading states and dynamic labels to the login and registration buttons in `app.js` and `index.html`.
