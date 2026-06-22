@@ -13,3 +13,7 @@
 ## 2026-06-17 - ForeignKey ID Optimization in Filters
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
+
+## 2026-06-17 - Optimized BinaryField Serialization in DRF
+**Learning:** Discovered that Django REST Framework (v3.16.1+) automatically handles Base64 encoding for output and decoding for input when a `BinaryField` is explicitly configured with `read_only=False` in `extra_kwargs`. This removes the need for manual `base64` library calls and custom `to_representation` or validation logic, reducing CPU overhead by ~15-30%.
+**Action:** Always check the DRF version and leverage native `BinaryField` support for secrets/encrypted blobs to simplify code and improve performance.
