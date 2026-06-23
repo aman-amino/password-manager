@@ -13,3 +13,7 @@
 ## 2026-06-17 - ForeignKey ID Optimization in Filters
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
+
+## 2026-06-17 - Native DRF BinaryField Handling & Redundant Join Cleanup
+**Learning:** DRF's `BinaryField` (v3.16.1+) automatically handles Base64 encoding and decoding for input/output. Manual `base64` library calls in `to_representation` and `validate` methods are redundant. Additionally, `select_related` joins on fields serialized as PrimaryKey IDs are unnecessary and increase database overhead.
+**Action:** Removed manual Base64 logic from `VaultItemSerializer` and removed redundant `select_related` calls from `AccessGrantViewSet` and `AuditEventViewSet`.

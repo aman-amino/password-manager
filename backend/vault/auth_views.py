@@ -92,8 +92,8 @@ class UserViewSet(views.APIView):
     def get(self, request):
         # Bolt Optimization: Added select_related to eliminate N+1 query bottlenecks for organization and department names.
         users = User.objects.select_related('organization', 'department').all()
-        if request.user.organization:
-            users = users.filter(organization=request.user.organization)
+        if request.user.organization_id:
+            users = users.filter(organization_id=request.user.organization_id)
 
         data = [
             {

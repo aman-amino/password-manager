@@ -27,16 +27,10 @@ class VaultItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "owner", "organization", "department", "created_at", "updated_at"]
 
     def validate_encrypted_blob(self, value):
-        if isinstance(value, str):
-            value = base64.b64decode(value)
+        # DRF BinaryField might pass bytes here if already decoded
         MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
             raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
-        return value
-
-    def validate_nonce(self, value):
-        if isinstance(value, str):
-            value = base64.b64decode(value)
         return value
 
     def validate(self, attrs):
@@ -53,17 +47,9 @@ class VaultItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if ret.get('encrypted_blob'):
-            ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
-        if ret.get('nonce'):
-            ret['nonce'] = base64.b64encode(instance.nonce).decode()
-        return ret
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()
