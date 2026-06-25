@@ -13,3 +13,7 @@
 ## 2026-06-17 - Keyboard Accessibility for Detail Panes
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
+
+## 2025-05-15 - ARIA Labels and Listener Consolidation
+**Learning:** Grouping related controls (like filter chips) with `role="group"` and descriptive labels improves the navigation experience for screen reader users. Consolidating event listeners prevents race conditions and ensures a single source of truth for UI state updates.
+**Action:** Audit interactive groups for missing ARIA roles and labels.

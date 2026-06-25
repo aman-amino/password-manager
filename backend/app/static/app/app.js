@@ -427,30 +427,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Copy to Clipboard ---
-    const copySecretBtn = document.getElementById('copySecretBtn');
-    if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', async () => {
-            const input = document.getElementById('decryptedValueInput');
-            if (!input || !input.value) return;
-
-            try {
-                await navigator.clipboard.writeText(input.value);
-                const originalText = copySecretBtn.textContent;
-                copySecretBtn.textContent = 'Copied!';
-                copySecretBtn.classList.remove('btn-outline-teal');
-                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
-
-                setTimeout(() => {
-                    copySecretBtn.textContent = originalText;
-                    copySecretBtn.classList.remove('btn-teal');
-                    copySecretBtn.classList.add('btn-outline-teal');
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
-        });
-    }
-
     if (copySecretBtn) {
         copySecretBtn.addEventListener('click', async () => {
             const decryptedInput = document.getElementById('decryptedValueInput');
@@ -459,9 +435,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await navigator.clipboard.writeText(decryptedInput.value);
 
-                // Palette UX: Visual feedback for copy
+                // Palette UX: Visual feedback for copy.
+                // We use a single consolidated listener to ensure predictable visual feedback.
                 const originalHTML = copySecretBtn.innerHTML;
-                copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
+                copySecretBtn.innerHTML = '<span class="small fw-semibold">Copied!</span>';
                 copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
 
                 setTimeout(() => {
