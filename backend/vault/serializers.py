@@ -51,19 +51,24 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Bolt Optimization: Use organization_id and department_id from the user object
+        # to avoid redundant database queries when creating a vault item.
         user = self.context["request"].user
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if ret.get('encrypted_blob'):
+        # Note: DRF's BinaryField normally handles Base64 serialization, but we keep this
+        # for explicit clarity and to ensure consistent string output format for frontend clients.
+        if ret.get('encrypted_blob') and isinstance(ret['encrypted_blob'], bytes):
             ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
-        if ret.get('nonce'):
+        if ret.get('nonce') and isinstance(ret['nonce'], bytes):
             ret['nonce'] = base64.b64encode(instance.nonce).decode()
         return ret
+
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()

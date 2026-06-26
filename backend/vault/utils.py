@@ -13,13 +13,17 @@ def log_audit_event(request, action, target_type, target_id, organization=None, 
 
     ip_address = request.META.get('REMOTE_ADDR') if request else None
 
-    # Try to get organization from actor if not provided
-    if organization is None and actor and hasattr(actor, 'organization'):
-        organization = actor.organization
+    # Bolt Optimization: Use organization_id directly from the actor or provided organization object
+    # to avoid redundant database queries when logging events.
+    org_id = None
+    if organization:
+        org_id = getattr(organization, 'id', organization)
+    elif actor and hasattr(actor, 'organization_id'):
+        org_id = actor.organization_id
 
     return AuditEvent.objects.create(
         actor=actor,
-        organization=organization,
+        organization_id=org_id,
         target_type=target_type,
         target_id=str(target_id),
         action=action,
