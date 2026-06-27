@@ -13,3 +13,7 @@
 ## 2026-06-17 - ForeignKey ID Optimization in Filters
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
+
+## 2026-06-18 - Redundant Query Reduction in Serialization and Logging
+**Learning:** Even when related objects are available on a model instance, accessing them (e.g., `user.organization`) can trigger a SELECT query if they weren't prefetched. Using the foreign key ID (e.g., `user.organization_id`) is a zero-cost operation in Django. Additionally, removing `select_related` for fields that are serialized only as IDs (PrimaryKey) reduces SQL JOIN overhead without increasing query count.
+**Action:** Optimized `VaultItemSerializer.create`, `log_audit_event`, and multiple ViewSet querysets to use ID fields and remove redundant joins.
