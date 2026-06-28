@@ -246,6 +246,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'vault-card';
+                // Palette UX: Add ARIA roles and keyboard accessibility
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-label', `View details for ${item.title}`);
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title-group">
@@ -260,7 +264,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="password-mask">••••••••••••</div>
                     </div>
                 `;
-                card.addEventListener('click', () => showDetail(item));
+                const handleClick = () => showDetail(item);
+                card.addEventListener('click', handleClick);
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleClick();
+                    }
+                });
                 fragment.appendChild(card);
             });
         }
@@ -427,30 +438,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Copy to Clipboard ---
-    const copySecretBtn = document.getElementById('copySecretBtn');
-    if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', async () => {
-            const input = document.getElementById('decryptedValueInput');
-            if (!input || !input.value) return;
-
-            try {
-                await navigator.clipboard.writeText(input.value);
-                const originalText = copySecretBtn.textContent;
-                copySecretBtn.textContent = 'Copied!';
-                copySecretBtn.classList.remove('btn-outline-teal');
-                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
-
-                setTimeout(() => {
-                    copySecretBtn.textContent = originalText;
-                    copySecretBtn.classList.remove('btn-teal');
-                    copySecretBtn.classList.add('btn-outline-teal');
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
-        });
-    }
-
+    // Palette UX Improvement: Consolidate copy button listeners and provide clear feedback
     if (copySecretBtn) {
         copySecretBtn.addEventListener('click', async () => {
             const decryptedInput = document.getElementById('decryptedValueInput');
@@ -459,7 +447,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await navigator.clipboard.writeText(decryptedInput.value);
 
-                // Palette UX: Visual feedback for copy
                 const originalHTML = copySecretBtn.innerHTML;
                 copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
                 copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
@@ -589,6 +576,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
+
+                if (received.length === 0) {
+                    // Palette UX: Show a friendly empty state when no shared items are found.
+                    requestList.innerHTML = `
+                        <div class="text-center py-5 opacity-75">
+                            <div class="mb-3">
+                                <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">share_off</span>
+                            </div>
+                            <h6 class="text-muted">No shared secrets</h6>
+                            <p class="small text-muted">Items shared with you by others will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
                 // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
                 // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();

@@ -13,3 +13,7 @@
 ## 2026-06-17 - Keyboard Accessibility for Detail Panes
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
+
+## 2026-06-28 - Accessibility and UX Feedback Consolidation
+**Learning:** Interactive elements like vault cards need explicit ARIA roles and keyboard listeners for full accessibility. Consolidating event listeners for micro-interactions (like copying) prevents visual feedback conflicts and redundant code.
+**Action:** Always add `role="button"` and keyboard support to clickable `div` elements, and manage UI feedback states in a single consolidated listener.

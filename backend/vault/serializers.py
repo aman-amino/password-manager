@@ -53,15 +53,18 @@ class VaultItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        # Bolt Optimization: Use IDs directly to avoid redundant database lookups for related objects
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if ret.get('encrypted_blob'):
+        # Bolt Optimization: DRF BinaryField might already handle Base64 in some versions/configs.
+        # Use isinstance check to ensure we only re-encode if it's still raw bytes.
+        if ret.get('encrypted_blob') and isinstance(instance.encrypted_blob, bytes):
             ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
-        if ret.get('nonce'):
+        if ret.get('nonce') and isinstance(instance.nonce, bytes):
             ret['nonce'] = base64.b64encode(instance.nonce).decode()
         return ret
 
