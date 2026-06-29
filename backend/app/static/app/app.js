@@ -213,20 +213,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return matchesSearch && matchesFilter;
         });
 
-        if (filtered.length === 0) {
-            vaultGrid.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <div class="text-muted mb-3">
-                        <span class="material-icons" style="font-size: 48px;">inventory_2</span>
-                    </div>
-                    <h5 class="text-muted">No secrets found</h5>
-                    <p class="text-muted small">Try adjusting your search or filter</p>
-                </div>
-            `;
-            document.getElementById('itemCount').textContent = `0 Secrets`;
-            return;
-        }
-
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 
@@ -383,7 +369,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Decrypt & Show ---
     const decryptBtn = document.getElementById('decryptBtn');
-    const copySecretBtn = document.getElementById('copySecretBtn');
 
     if (decryptBtn) {
         decryptBtn.addEventListener('click', async () => {
@@ -428,29 +413,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Copy to Clipboard ---
     const copySecretBtn = document.getElementById('copySecretBtn');
-    if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', async () => {
-            const input = document.getElementById('decryptedValueInput');
-            if (!input || !input.value) return;
-
-            try {
-                await navigator.clipboard.writeText(input.value);
-                const originalText = copySecretBtn.textContent;
-                copySecretBtn.textContent = 'Copied!';
-                copySecretBtn.classList.remove('btn-outline-teal');
-                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
-
-                setTimeout(() => {
-                    copySecretBtn.textContent = originalText;
-                    copySecretBtn.classList.remove('btn-teal');
-                    copySecretBtn.classList.add('btn-outline-teal');
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
-        });
-    }
-
     if (copySecretBtn) {
         copySecretBtn.addEventListener('click', async () => {
             const decryptedInput = document.getElementById('decryptedValueInput');
@@ -589,6 +551,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
+
+                if (received.length === 0) {
+                    // Palette UX: Show empty state for shared requests
+                    requestList.innerHTML = `
+                        <div class="text-center py-5 opacity-75">
+                            <span class="material-icons mb-3" style="font-size: 48px; color: var(--text-muted);">share_off</span>
+                            <p class="text-muted">No access requests found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
                 // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
                 // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();

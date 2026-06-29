@@ -53,15 +53,18 @@ class VaultItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        # Bolt Optimization: use organization_id and department_id directly to avoid redundant lookups.
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if ret.get('encrypted_blob'):
+        # Bolt Optimization: only encode to Base64 if the value is in bytes.
+        # This avoids redundant work if DRF already handled the conversion.
+        if ret.get('encrypted_blob') and isinstance(instance.encrypted_blob, bytes):
             ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
-        if ret.get('nonce'):
+        if ret.get('nonce') and isinstance(instance.nonce, bytes):
             ret['nonce'] = base64.b64encode(instance.nonce).decode()
         return ret
 
