@@ -13,3 +13,7 @@
 ## 2026-06-17 - ForeignKey ID Optimization in Filters
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
+
+## 2026-07-01 - Redundant Join and Implicit Query Optimization
+**Learning:** Identified that accessing `actor.organization` in audit logging triggered an implicit SELECT query when not prefetched. Also found that `select_related` on fields serialized as IDs (PrimaryKeyRelatedField) adds database join overhead with no benefit.
+**Action:** Use `organization_id` directly in `log_audit_event` and remove redundant `select_related` joins from `AccessGrantViewSet`.

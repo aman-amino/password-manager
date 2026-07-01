@@ -73,11 +73,12 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Use select_related to optimize retrieval of related fields and avoid N+1 queries during serialization.
+        # Bolt Optimization: Use select_related('grantee') for StringRelatedField.
+        # vault_item and granted_by are serialized as PrimaryKey IDs, so joins are redundant.
         return (
             AccessGrant.objects.filter(grantee=user, is_active=True)
             | AccessGrant.objects.filter(granted_by=user)
-        ).select_related("grantee", "vault_item", "granted_by")
+        ).select_related("grantee")
 
     def perform_create(self, serializer):
         instance = serializer.save()
