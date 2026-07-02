@@ -14,6 +14,6 @@
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
 
-## 2025-05-15 - ARIA Labels and Listener Consolidation
-**Learning:** Grouping related controls (like filter chips) with `role="group"` and descriptive labels improves the navigation experience for screen reader users. Consolidating event listeners prevents race conditions and ensures a single source of truth for UI state updates.
-**Action:** Audit interactive groups for missing ARIA roles and labels.
+## 2026-06-19 - Micro-UX feedback for async operations
+**Learning:** Providing immediate visual feedback (spinners and stateful button text) for long-running operations like authentication and decryption significantly improves perceived performance and user confidence.
+**Action:** Implemented loading states for login and decryption buttons and added a password visibility toggle.
