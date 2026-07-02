@@ -36,20 +36,28 @@
                 </div>
                 <div class="mb-4">
                     <label class="form-label small text-muted">MASTER PASSWORD</label>
-                    <input type="password" id="authPassword" class="form-control" required autocomplete="current-password">
+                    <div class="input-group">
+                        <input type="password" id="authPassword" class="form-control" required autocomplete="current-password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" aria-label="Toggle password visibility">
+                            <span class="material-icons" style="font-size: 18px; vertical-align: middle;">visibility</span>
+                        </button>
+                    </div>
                     <div class="form-text x-small text-muted mt-2">Never shared with the server. Used to derive your keys locally.</div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2" id="authSubmit">Sign In</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="authSubmit">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <span class="btn-text">Sign In</span>
+                </button>
                 <div id="authError" class="text-danger small mt-3 text-center d-none"></div>
             </form>
         </div>
     </div>
 
-    <div class="modal fade" id="newSecretModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="newSecretModal" tabindex="-1" aria-labelledby="newSecretModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title">New Secret</h5>
+                    <h5 class="modal-title" id="newSecretModalLabel">New Secret</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="newSecretForm">
@@ -93,11 +101,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="shareSecretModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="shareSecretModal" tabindex="-1" aria-labelledby="shareSecretModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title">Share Secret</h5>
+                    <h5 class="modal-title" id="shareSecretModalLabel">Share Secret</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="shareSecretForm">
@@ -179,7 +187,7 @@
                 <div class="search-bar">
                     <input type="text" id="vault-search" class="form-control" placeholder="Search secrets, tags, metadata..." aria-label="Search secrets">
                 </div>
-                <div class="filter-chips">
+                <div class="filter-chips" role="group" aria-label="Filter secrets by scope">
                     <button class="filter-chip active" id="filter-all" aria-pressed="true">All</button>
                     <button class="filter-chip" id="filter-personal" aria-pressed="false">Personal</button>
                     <button class="filter-chip" id="filter-dept" aria-pressed="false">Department</button>
@@ -282,7 +290,10 @@
                     </div>
                 </div>
                 <div class="detail-actions mt-auto">
-                    <button id="decryptBtn" class="btn btn-primary w-100 mb-2">Decrypt & Show</button>
+                    <button id="decryptBtn" class="btn btn-primary w-100 mb-2 d-flex align-items-center justify-content-center gap-2">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">Decrypt & Show</span>
+                    </button>
                     <button class="btn btn-outline-secondary w-100">Share Access</button>
                 </div>
             </div>
