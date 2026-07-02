@@ -30,10 +30,15 @@ class VaultItemSerializer(serializers.ModelSerializer):
         }
 
     def validate_encrypted_blob(self, value):
-        # DRF 3.16.1+ automatically decodes Base64 to memoryview for BinaryField when read_only=False
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer
+        # when extra_kwargs explicitly marks them as not read_only.
         MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
             raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
+        return value
+
+    def validate_nonce(self, value):
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer.
         return value
 
     def validate(self, attrs):
@@ -48,12 +53,15 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Bolt Optimization: Use organization_id and department_id from the request user object
+        # to avoid redundant database lookups for these related objects during creation.
         user = self.context["request"].user
+        # Bolt Optimization: Use IDs directly to avoid redundant database queries for related objects.
         validated_data["owner"] = user
-        # Bolt Optimization: Use organization_id and department_id to avoid redundant database lookups
         validated_data["organization_id"] = user.organization_id
         validated_data["department_id"] = user.department_id
         return super().create(validated_data)
+
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()

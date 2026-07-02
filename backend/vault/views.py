@@ -53,8 +53,8 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
-        # Bolt Optimization: Removed "organization" from select_related as it's serialized as PK.
-        # Only select_related("actor") is needed for StringRelatedField.
+        # Bolt Optimization: Removed "organization" from select_related as it is serialized as a primary key.
+        # "actor" is still needed for StringRelatedField.
         qs = AuditEvent.objects.select_related("actor").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
@@ -74,8 +74,8 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Bolt Optimization: Removed "vault_item" and "granted_by" from select_related
-        # as they are serialized as PrimaryKey IDs and don't need a join.
+        # Bolt Optimization: Removed "vault_item" and "granted_by" from select_related as they are serialized as primary keys.
+        # "grantee" is still needed for StringRelatedField.
         return (
             AccessGrant.objects.filter(grantee=user, is_active=True)
             | AccessGrant.objects.filter(granted_by=user)
