@@ -435,9 +435,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await navigator.clipboard.writeText(decryptedInput.value);
 
-                // Palette UX: Visual feedback for copy
+                // Palette UX: Visual feedback for copy.
+                // We use a single consolidated listener to ensure predictable visual feedback.
                 const originalHTML = copySecretBtn.innerHTML;
-                copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
+                copySecretBtn.innerHTML = '<span class="small fw-semibold">Copied!</span>';
                 copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
 
                 setTimeout(() => {

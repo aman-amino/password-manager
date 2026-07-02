@@ -53,11 +53,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="newSecretModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="newSecretModal" tabindex="-1" aria-labelledby="newSecretModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title">New Secret</h5>
+                    <h5 class="modal-title" id="newSecretModalLabel">New Secret</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="newSecretForm">
@@ -101,11 +101,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="shareSecretModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="shareSecretModal" tabindex="-1" aria-labelledby="shareSecretModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title">Share Secret</h5>
+                    <h5 class="modal-title" id="shareSecretModalLabel">Share Secret</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="shareSecretForm">
@@ -187,7 +187,7 @@
                 <div class="search-bar">
                     <input type="text" id="vault-search" class="form-control" placeholder="Search secrets, tags, metadata..." aria-label="Search secrets">
                 </div>
-                <div class="filter-chips">
+                <div class="filter-chips" role="group" aria-label="Filter secrets by scope">
                     <button class="filter-chip active" id="filter-all" aria-pressed="true">All</button>
                     <button class="filter-chip" id="filter-personal" aria-pressed="false">Personal</button>
                     <button class="filter-chip" id="filter-dept" aria-pressed="false">Department</button>
