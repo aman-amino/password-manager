@@ -1,4 +1,3 @@
-import base64
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import VaultItem, AuditEvent, AccessGrant
@@ -25,18 +24,21 @@ class VaultItemSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "owner", "organization", "department", "created_at", "updated_at"]
+        extra_kwargs = {
+            "encrypted_blob": {"read_only": False},
+            "nonce": {"read_only": False},
+        }
 
     def validate_encrypted_blob(self, value):
-        if isinstance(value, str):
-            value = base64.b64decode(value)
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer
+        # when extra_kwargs explicitly marks them as not read_only.
         MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
             raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
         return value
 
     def validate_nonce(self, value):
-        if isinstance(value, str):
-            value = base64.b64decode(value)
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer.
         return value
 
     def validate(self, attrs):
@@ -51,19 +53,15 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Bolt Optimization: Use organization_id and department_id from the request user object
+        # to avoid redundant database lookups for these related objects during creation.
         user = self.context["request"].user
+        # Bolt Optimization: Use IDs directly to avoid redundant database queries for related objects.
         validated_data["owner"] = user
-        validated_data["organization"] = user.organization
-        validated_data["department"] = user.department
+        validated_data["organization_id"] = user.organization_id
+        validated_data["department_id"] = user.department_id
         return super().create(validated_data)
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if ret.get('encrypted_blob'):
-            ret['encrypted_blob'] = base64.b64encode(instance.encrypted_blob).decode()
-        if ret.get('nonce'):
-            ret['nonce'] = base64.b64encode(instance.nonce).decode()
-        return ret
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()

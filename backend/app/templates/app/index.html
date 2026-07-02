@@ -36,10 +36,18 @@
                 </div>
                 <div class="mb-4">
                     <label class="form-label small text-muted">MASTER PASSWORD</label>
-                    <input type="password" id="authPassword" class="form-control" required autocomplete="current-password">
+                    <div class="input-group">
+                        <input type="password" id="authPassword" class="form-control" required autocomplete="current-password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" aria-label="Toggle password visibility">
+                            <span class="material-icons" style="font-size: 18px; vertical-align: middle;">visibility</span>
+                        </button>
+                    </div>
                     <div class="form-text x-small text-muted mt-2">Never shared with the server. Used to derive your keys locally.</div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2" id="authSubmit">Sign In</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="authSubmit">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <span class="btn-text">Sign In</span>
+                </button>
                 <div id="authError" class="text-danger small mt-3 text-center d-none"></div>
             </form>
         </div>
