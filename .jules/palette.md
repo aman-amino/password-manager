@@ -14,6 +14,6 @@
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
 
-## 2026-06-21 - Asynchronous Feedback in Auth UI
-**Learning:** Providing immediate visual feedback during multi-stage asynchronous operations (like PBKDF2 derivation followed by API requests) improves perceived performance and reduces user anxiety. Loading spinners and context-aware button text ("Signing In...") are effective patterns for this.
-**Action:** Added loading states and dynamic labels to the login and registration buttons in `app.js` and `index.html`.
+## 2026-06-19 - Micro-UX feedback for async operations
+**Learning:** Providing immediate visual feedback (spinners and stateful button text) for long-running operations like authentication and decryption significantly improves perceived performance and user confidence.
+**Action:** Implemented loading states for login and decryption buttons and added a password visibility toggle.

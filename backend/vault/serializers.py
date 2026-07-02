@@ -25,19 +25,21 @@ class VaultItemSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "owner", "organization", "department", "created_at", "updated_at"]
-        # Bolt Optimization: In DRF 3.16.1+, BinaryField properties are read-only by default.
-        # Setting read_only: False enables automatic Base64 encoding/decoding, which is faster
-        # than manual base64.b64encode/decode calls.
         extra_kwargs = {
             "encrypted_blob": {"read_only": False},
             "nonce": {"read_only": False},
         }
 
     def validate_encrypted_blob(self, value):
-        # Bolt Optimization: value is already decoded to bytes/memoryview by DRF.
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer
+        # when extra_kwargs explicitly marks them as not read_only.
         MAX_SIZE = 1 * 1024 * 1024
         if len(value) > MAX_SIZE:
             raise serializers.ValidationError("Encrypted blob exceeds 1MB limit.")
+        return value
+
+    def validate_nonce(self, value):
+        # Bolt Optimization: Base64 decoding is handled automatically by DRF for BinaryFields in ModelSerializer.
         return value
 
     def validate(self, attrs):
@@ -52,12 +54,15 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Bolt Optimization: Use IDs directly to avoid redundant database lookups for Organization and Department objects.
+        # Bolt Optimization: Use organization_id and department_id from the request user object
+        # to avoid redundant database lookups for these related objects during creation.
         user = self.context["request"].user
+        # Bolt Optimization: Use IDs directly to avoid redundant database queries for related objects.
         validated_data["owner"] = user
         validated_data["organization_id"] = user.organization_id
         validated_data["department_id"] = user.department_id
         return super().create(validated_data)
+
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()
