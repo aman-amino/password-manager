@@ -63,7 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginTab.classList.add('active');
         registerTab.classList.remove('active');
         emailGroup.classList.add('d-none');
-        authSubmit.textContent = 'Sign In';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Sign In';
         authError.classList.add('d-none');
     });
 
@@ -72,14 +73,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         registerTab.classList.add('active');
         loginTab.classList.remove('active');
         emailGroup.classList.remove('d-none');
-        authSubmit.textContent = 'Create Account';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Create Account';
         authError.classList.add('d-none');
     });
+
+    // Palette UX: Password visibility toggle
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = authPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            authPassword.setAttribute('type', type);
+            const icon = togglePasswordBtn.querySelector('.material-icons');
+            if (icon) icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
 
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         authError.classList.add('d-none');
+
+        const spinner = authSubmit.querySelector('.spinner-border');
+        const btnText = authSubmit.querySelector('.btn-text');
         authSubmit.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        const originalText = btnText ? btnText.textContent : (isRegister ? 'Create Account' : 'Sign In');
+        if (btnText) btnText.textContent = isRegister ? 'Registering...' : 'Signing In...';
 
         const username = authUsername.value;
         const password = authPassword.value;
@@ -152,6 +171,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             authError.classList.remove('d-none');
         } finally {
             authSubmit.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
+            if (btnText) btnText.textContent = originalText;
         }
     });
 
@@ -273,22 +294,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailScope').textContent = item.scope;
         document.getElementById('detailType').textContent = item.item_type;
 
-        // Palette UX Improvement: Clear previous decryption state
+        // Palette UX Improvement: Reset decryption section when showing new item
         const decryptedValueInput = document.getElementById('decryptedValueInput');
         const decryptedSection = document.getElementById('decryptedSection');
-        if (decryptedValueInput) decryptedValueInput.value = '';
-        if (decryptedSection) decryptedSection.classList.add('d-none');
+        if (decryptedSection && decryptedValueInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedValueInput.value = '';
+        }
 
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
-
-        // Palette UX Improvement: Reset decryption section when showing new item
-        const decryptedSection = document.getElementById('decryptedSection');
-        const decryptedInput = document.getElementById('decryptedValueInput');
-        if (decryptedSection && decryptedInput) {
-            decryptedSection.classList.add('d-none');
-            decryptedInput.value = '';
-        }
 
         loadItemAuditLogs(item.id);
     }
@@ -427,30 +442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Copy to Clipboard ---
-    const copySecretBtn = document.getElementById('copySecretBtn');
-    if (copySecretBtn) {
-        copySecretBtn.addEventListener('click', async () => {
-            const input = document.getElementById('decryptedValueInput');
-            if (!input || !input.value) return;
-
-            try {
-                await navigator.clipboard.writeText(input.value);
-                const originalText = copySecretBtn.textContent;
-                copySecretBtn.textContent = 'Copied!';
-                copySecretBtn.classList.remove('btn-outline-teal');
-                copySecretBtn.classList.add('btn-teal'); // Assuming btn-teal exists or using style
-
-                setTimeout(() => {
-                    copySecretBtn.textContent = originalText;
-                    copySecretBtn.classList.remove('btn-teal');
-                    copySecretBtn.classList.add('btn-outline-teal');
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy!', err);
-            }
-        });
-    }
-
     if (copySecretBtn) {
         copySecretBtn.addEventListener('click', async () => {
             const decryptedInput = document.getElementById('decryptedValueInput');
@@ -469,7 +460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
                 }, 2000);
             } catch (err) {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy!', err);
             }
         });
     }
