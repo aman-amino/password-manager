@@ -53,9 +53,9 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
-        # Optimization: select_related("actor") is needed for StringRelatedField.
-        # "organization" is serialized as PK, so join is not strictly necessary but kept if needed for filtering.
-        qs = AuditEvent.objects.select_related("actor", "organization").all()
+        # Bolt Optimization: Removed "organization" from select_related as it is serialized as a primary key.
+        # "actor" is still needed for StringRelatedField.
+        qs = AuditEvent.objects.select_related("actor").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
         if target_type:
@@ -73,11 +73,12 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Use select_related to optimize retrieval of related fields and avoid N+1 queries during serialization.
+        # Bolt Optimization: Removed "vault_item" and "granted_by" from select_related as they are serialized as primary keys.
+        # "grantee" is still needed for StringRelatedField.
         return (
             AccessGrant.objects.filter(grantee=user, is_active=True)
             | AccessGrant.objects.filter(granted_by=user)
-        ).select_related("grantee", "vault_item", "granted_by")
+        ).select_related("grantee")
 
     def perform_create(self, serializer):
         instance = serializer.save()
