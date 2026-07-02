@@ -18,9 +18,8 @@ def log_audit_event(request, action, target_type, target_id, organization=None, 
     if organization_id is None and actor:
         organization_id = getattr(actor, 'organization_id', None)
 
-    # Bolt Optimization: Use organization_id directly to avoid redundant database queries for logging events.
+    # Fix: Remove duplicate organization_id to prevent TypeError.
     return AuditEvent.objects.create(
-        organization_id=organization_id,
         actor=actor,
         organization_id=organization_id,
         target_type=target_type,
