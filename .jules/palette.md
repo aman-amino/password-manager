@@ -14,6 +14,6 @@
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
 
-## 2026-06-28 - Accessibility and UX Feedback Consolidation
-**Learning:** Interactive elements like vault cards need explicit ARIA roles and keyboard listeners for full accessibility. Consolidating event listeners for micro-interactions (like copying) prevents visual feedback conflicts and redundant code.
-**Action:** Always add `role="button"` and keyboard support to clickable `div` elements, and manage UI feedback states in a single consolidated listener.
+## 2026-06-19 - Micro-UX feedback for async operations
+**Learning:** Providing immediate visual feedback (spinners and stateful button text) for long-running operations like authentication and decryption significantly improves perceived performance and user confidence.
+**Action:** Implemented loading states for login and decryption buttons and added a password visibility toggle.
