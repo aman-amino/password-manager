@@ -566,6 +566,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const grants = await res.json();
                 const received = grants.filter(g => g.grantee === currentUser.username);
                 requestList.innerHTML = '';
+
+                if (received.length === 0) {
+                    // Palette UX: Show a friendly empty state when no shared items are found.
+                    requestList.innerHTML = `
+                        <div class="text-center py-5 opacity-75">
+                            <div class="mb-3">
+                                <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">share_off</span>
+                            </div>
+                            <h6 class="text-muted">No shared secrets</h6>
+                            <p class="small text-muted">Items shared with you by others will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
                 // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
                 // This reduces browser reflows from O(N) to O(1) per list load.
                 const fragment = document.createDocumentFragment();
