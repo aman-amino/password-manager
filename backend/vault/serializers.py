@@ -63,6 +63,7 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+
 class AuditEventSerializer(serializers.ModelSerializer):
     actor = serializers.StringRelatedField()
     class Meta:
