@@ -1,4 +1,3 @@
-import base64
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import VaultItem, AuditEvent, AccessGrant

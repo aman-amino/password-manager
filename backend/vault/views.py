@@ -63,8 +63,9 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user.role == User.Role.SUPERADMIN:
             return qs.order_by("-created_at")
-        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization:
-            return qs.filter(organization=user.organization).order_by("-created_at")
+        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization_id:
+            # Bolt Optimization: Use organization_id filter to avoid unnecessary join or lookup
+            return qs.filter(organization_id=user.organization_id).order_by("-created_at")
         return qs.filter(actor=user).order_by("-created_at")
 
 class AccessGrantViewSet(viewsets.ModelViewSet):
