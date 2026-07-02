@@ -63,7 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginTab.classList.add('active');
         registerTab.classList.remove('active');
         emailGroup.classList.add('d-none');
-        authSubmit.textContent = 'Sign In';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Sign In';
         authError.classList.add('d-none');
     });
 
@@ -72,14 +73,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         registerTab.classList.add('active');
         loginTab.classList.remove('active');
         emailGroup.classList.remove('d-none');
-        authSubmit.textContent = 'Create Account';
+        const btnText = authSubmit.querySelector('.btn-text');
+        if (btnText) btnText.textContent = 'Create Account';
         authError.classList.add('d-none');
     });
+
+    // Palette UX: Password visibility toggle
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = authPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            authPassword.setAttribute('type', type);
+            const icon = togglePasswordBtn.querySelector('.material-icons');
+            if (icon) icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
 
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         authError.classList.add('d-none');
+
+        const spinner = authSubmit.querySelector('.spinner-border');
+        const btnText = authSubmit.querySelector('.btn-text');
         authSubmit.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        const originalText = btnText ? btnText.textContent : (isRegister ? 'Create Account' : 'Sign In');
+        if (btnText) btnText.textContent = isRegister ? 'Registering...' : 'Signing In...';
 
         const username = authUsername.value;
         const password = authPassword.value;
@@ -152,6 +171,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             authError.classList.remove('d-none');
         } finally {
             authSubmit.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
+            if (btnText) btnText.textContent = originalText;
         }
     });
 
@@ -216,23 +237,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 
-        if (filtered.length === 0) {
-            // Palette UX improvement: show a user-friendly empty state when no secrets match filters/search
-            const emptyState = document.createElement('div');
-            emptyState.className = 'col-12 text-center py-5 opacity-75';
-            emptyState.innerHTML = `
-                <div class="mb-3">
-                    <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">inventory_2</span>
-                </div>
-                <h5 class="text-muted">No secrets found</h5>
-                <p class="small text-muted">Try adjusting your filters or search terms.</p>
-            `;
-            fragment.appendChild(emptyState);
-        } else {
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'vault-card';
-                card.innerHTML = `
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'vault-card';
+            card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title-group">
                             <h3 class="h6 mb-0">${item.title}</h3>
@@ -246,10 +254,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="password-mask">••••••••••••</div>
                     </div>
                 `;
-                card.addEventListener('click', () => showDetail(item));
-                fragment.appendChild(card);
-            });
-        }
+            card.addEventListener('click', () => showDetail(item));
+            fragment.appendChild(card);
+        });
         vaultGrid.appendChild(fragment);
         document.getElementById('itemCount').textContent = `${filtered.length} Secrets`;
     }
@@ -259,22 +266,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detailScope').textContent = item.scope;
         document.getElementById('detailType').textContent = item.item_type;
 
-        // Palette UX Improvement: Clear previous decryption state
+        // Palette UX Improvement: Reset decryption section when showing new item
         const decryptedValueInput = document.getElementById('decryptedValueInput');
         const decryptedSection = document.getElementById('decryptedSection');
-        if (decryptedValueInput) decryptedValueInput.value = '';
-        if (decryptedSection) decryptedSection.classList.add('d-none');
+        if (decryptedSection && decryptedValueInput) {
+            decryptedSection.classList.add('d-none');
+            decryptedValueInput.value = '';
+        }
 
         detailPane.classList.add('active');
         detailPane.dataset.itemId = item.id;
-
-        // Palette UX Improvement: Reset decryption section when showing new item
-        const decryptedSection = document.getElementById('decryptedSection');
-        const decryptedInput = document.getElementById('decryptedValueInput');
-        if (decryptedSection && decryptedInput) {
-            decryptedSection.classList.add('d-none');
-            decryptedInput.value = '';
-        }
 
         loadItemAuditLogs(item.id);
     }
@@ -412,7 +413,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Copy to Clipboard ---
-    const copySecretBtn = document.getElementById('copySecretBtn');
     if (copySecretBtn) {
         copySecretBtn.addEventListener('click', async () => {
             const decryptedInput = document.getElementById('decryptedValueInput');
@@ -421,9 +421,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await navigator.clipboard.writeText(decryptedInput.value);
 
-                // Palette UX: Visual feedback for copy
+                // Palette UX: Visual feedback for copy.
+                // We use a single consolidated listener to ensure predictable visual feedback.
                 const originalHTML = copySecretBtn.innerHTML;
-                copySecretBtn.innerHTML = '<span class="small">Copied!</span>';
+                copySecretBtn.innerHTML = '<span class="small fw-semibold">Copied!</span>';
                 copySecretBtn.classList.replace('btn-outline-teal', 'btn-teal');
 
                 setTimeout(() => {
@@ -431,7 +432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
                 }, 2000);
             } catch (err) {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy!', err);
             }
         });
     }
@@ -553,11 +554,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 requestList.innerHTML = '';
 
                 if (received.length === 0) {
-                    // Palette UX: Show empty state for shared requests
+                    // Palette UX: Show a friendly empty state when no shared items are found.
                     requestList.innerHTML = `
                         <div class="text-center py-5 opacity-75">
-                            <span class="material-icons mb-3" style="font-size: 48px; color: var(--text-muted);">share_off</span>
-                            <p class="text-muted">No access requests found.</p>
+                            <div class="mb-3">
+                                <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">share_off</span>
+                            </div>
+                            <h6 class="text-muted">No shared secrets</h6>
+                            <p class="small text-muted">Items shared with you by others will appear here.</p>
                         </div>
                     `;
                     return;
