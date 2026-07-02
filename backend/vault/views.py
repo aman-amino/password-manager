@@ -53,8 +53,8 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
         target_id = self.request.query_params.get('target_id')
         target_type = self.request.query_params.get('target_type')
 
-        # Bolt Optimization: select_related("actor") is needed for StringRelatedField.
-        # "organization" is removed as it's serialized as a PrimaryKey ID, avoiding an unnecessary join.
+        # Bolt Optimization: Removed "organization" from select_related as it is serialized as a primary key.
+        # "actor" is still needed for StringRelatedField.
         qs = AuditEvent.objects.select_related("actor").all()
         if target_id:
             qs = qs.filter(target_id=target_id)
@@ -63,8 +63,9 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
 
         if user.role == User.Role.SUPERADMIN:
             return qs.order_by("-created_at")
-        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization:
-            return qs.filter(organization=user.organization).order_by("-created_at")
+        if user.role in (User.Role.ADMIN, User.Role.SUBADMIN) and user.organization_id:
+            # Bolt Optimization: Use organization_id filter to avoid unnecessary join or lookup
+            return qs.filter(organization_id=user.organization_id).order_by("-created_at")
         return qs.filter(actor=user).order_by("-created_at")
 
 class AccessGrantViewSet(viewsets.ModelViewSet):
@@ -73,8 +74,8 @@ class AccessGrantViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Bolt Optimization: select_related('grantee') is needed for StringRelatedField.
-        # 'vault_item' and 'granted_by' are removed as they are serialized as PrimaryKey IDs, reducing DB overhead.
+        # Bolt Optimization: Removed "vault_item" and "granted_by" from select_related as they are serialized as primary keys.
+        # "grantee" is still needed for StringRelatedField.
         return (
             AccessGrant.objects.filter(grantee=user, is_active=True)
             | AccessGrant.objects.filter(granted_by=user)
