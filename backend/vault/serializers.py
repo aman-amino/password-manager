@@ -54,6 +54,8 @@ class VaultItemSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Bolt Optimization: Use organization_id and department_id from the request user object
+        # to avoid redundant database lookups for these related objects during creation.
         user = self.context["request"].user
         # Bolt Optimization: Use IDs directly to avoid redundant database queries for related objects.
         validated_data["owner"] = user
