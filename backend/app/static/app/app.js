@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copySecretBtn.classList.replace('btn-teal', 'btn-outline-teal');
                 }, 2000);
             } catch (err) {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy!', err);
             }
         });
     }
