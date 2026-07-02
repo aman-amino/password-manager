@@ -46,3 +46,4 @@
 ## Step 13: Secure Context Handling & UI Contrast Polish
 - Added check for SubtleCrypto and Secure Context (`window.isSecureContext`) with clear guidance error message.
 - Re-styled login/registration form labels, form text, and inputs with high-contrast, premium dark mode styling.
+- **Step 15 Complete:** Optimized `VaultItemSerializer` using DRF built-in Base64 handling (Bolt) and added loading spinners to auth/decryption buttons (Palette).

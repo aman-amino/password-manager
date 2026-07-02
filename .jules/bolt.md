@@ -14,6 +14,6 @@
 **Learning:** In Django querysets, filtering by `related_field_id=obj.id` is more efficient than `related_field=obj` as it avoids an implicit query to fetch the related object if it's not already prefetched.
 **Action:** Updated `vault_item_queryset_for_user` in `backend/vault/policy.py` to use `organization_id` and `department_id` for filtering.
 
-## 2026-06-30 - Redundant ForeignKey Object Lookups
-**Learning:** Identified multiple instances where filtering or assigning related objects triggered unnecessary database lookups. Accessing `related_field_id` is always faster than `related_field` when the ID is already available on the parent object.
-**Action:** Use `organization_id` and `department_id` instead of `organization` and `department` for filtering and in serializer `create` methods.
+## 2026-06-18 - Redundant Query Elimination and DRF BinaryField Optimization
+**Learning:** Redundant database queries occur when assigning model instances to foreign keys if the ID is already available (e.g., `user.organization_id`). Additionally, DRF `ModelSerializer` can handle Base64 for `BinaryField` automatically if `extra_kwargs` explicitly sets `read_only: False`.
+**Action:** Optimized `VaultItemSerializer.create` and `log_audit_event` to use `_id` fields. Pruned unnecessary `select_related` in viewsets. Removed manual Base64 logic in `VaultItemSerializer` by configuring `extra_kwargs`.
