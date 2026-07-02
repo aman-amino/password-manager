@@ -234,20 +234,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return matchesSearch && matchesFilter;
         });
 
-        if (filtered.length === 0) {
-            vaultGrid.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <div class="text-muted mb-3">
-                        <span class="material-icons" style="font-size: 48px;">inventory_2</span>
-                    </div>
-                    <h5 class="text-muted">No secrets found</h5>
-                    <p class="text-muted small">Try adjusting your search or filter</p>
-                </div>
-            `;
-            document.getElementById('itemCount').textContent = `0 Secrets`;
-            return;
-        }
-
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 

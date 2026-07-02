@@ -20,6 +20,7 @@ def log_audit_event(request, action, target_type, target_id, organization=None, 
 
     # Bolt Optimization: Use organization_id directly to avoid redundant database queries for logging events.
     return AuditEvent.objects.create(
+        organization_id=organization_id,
         actor=actor,
         organization_id=organization_id,
         target_type=target_type,
