@@ -14,6 +14,6 @@
 **Learning:** Interactive side panes and modals should always be dismissible via the 'Escape' key to ensure a standard and accessible micro-UX for keyboard users.
 **Action:** Implemented a global 'Escape' key listener in `backend/app/static/app/app.js` to close the secret detail pane.
 
-## 2026-06-18 - Consistent Async Loading Feedback
-**Learning:** Micro-UX delight is achieved through consistent visual feedback for all long-running actions. Using Bootstrap spinners with text updates (e.g., 'Signing In...', 'Decrypting...') across all submission and processing buttons improves perceived responsiveness.
-**Action:** Implement loading state toggles for all async buttons (Auth, Decrypt, Save) using a consistent `.spinner-border` and `.btn-text` pattern.
+## 2026-06-19 - Micro-UX feedback for async operations
+**Learning:** Providing immediate visual feedback (spinners and stateful button text) for long-running operations like authentication and decryption significantly improves perceived performance and user confidence.
+**Action:** Implemented loading states for login and decryption buttons and added a password visibility toggle.
