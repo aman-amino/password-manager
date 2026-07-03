@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let masterKey = null;
     let secrets = [];
     let isRegister = false;
+    // Bolt Performance: Cache for tab-view data to avoid redundant API calls
+    let cache = {
+        requests: null,
+        auditLogs: null,
+        people: null
+    };
 
     // --- Auth Logic ---
 
@@ -66,6 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btnText = authSubmit.querySelector('.btn-text');
         if (btnText) btnText.textContent = 'Sign In';
         authError.classList.add('d-none');
+        // Palette UX: Auto-focus username field when switching tabs
+        authUsername.focus();
     });
 
     registerTab.addEventListener('click', () => {
@@ -76,6 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btnText = authSubmit.querySelector('.btn-text');
         if (btnText) btnText.textContent = 'Create Account';
         authError.classList.add('d-none');
+        // Palette UX: Auto-focus username field when switching tabs
+        authUsername.focus();
     });
 
     // Palette UX: Password visibility toggle
@@ -304,7 +314,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const newSecretBtn = document.getElementById('newSecretBtn');
     const newSecretModalEl = document.getElementById('newSecretModal');
     let newSecretModal = null;
-    if (newSecretModalEl) newSecretModal = new bootstrap.Modal(newSecretModalEl);
+    if (newSecretModalEl) {
+        newSecretModal = new bootstrap.Modal(newSecretModalEl);
+        // Palette UX: Auto-focus first input when modal is shown
+        newSecretModalEl.addEventListener('shown.bs.modal', () => {
+            document.getElementById('secretTitle').focus();
+        });
+    }
     const newSecretForm = document.getElementById('newSecretForm');
 
     if (newSecretBtn) {
@@ -351,6 +367,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (res.ok) {
                     newSecretModal.hide();
                     newSecretForm.reset();
+                    // Bolt Performance: Invalidate audit logs cache after creation
+                    cache.auditLogs = null;
                     loadVault();
                 } else {
                     const data = await res.json();
@@ -499,7 +517,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const shareBtn = document.querySelector('.detail-actions .btn-outline-secondary');
     const shareSecretModalEl = document.getElementById('shareSecretModal');
     let shareSecretModal = null;
-    if (shareSecretModalEl) shareSecretModal = new bootstrap.Modal(shareSecretModalEl);
+    if (shareSecretModalEl) {
+        shareSecretModal = new bootstrap.Modal(shareSecretModalEl);
+        // Palette UX: Auto-focus first input when modal is shown
+        shareSecretModalEl.addEventListener('shown.bs.modal', () => {
+            document.getElementById('shareRecipient').focus();
+        });
+    }
     const shareSecretForm = document.getElementById('shareSecretForm');
 
     if (shareBtn) {
@@ -530,6 +554,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     alert('Access shared successfully!');
                     shareSecretModal.hide();
                     shareSecretForm.reset();
+                    // Bolt Performance: Invalidate requests and audit logs cache after sharing
+                    cache.requests = null;
+                    cache.auditLogs = null;
                 } else {
                     const data = await res.json();
                     alert('Sharing failed: ' + JSON.stringify(data));
@@ -546,49 +573,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         const requestList = document.getElementById('requestList');
         if (!requestList) return;
 
+        // Bolt Performance: Return cached data if available
+        if (cache.requests) {
+            renderRequests(cache.requests);
+            return;
+        }
+
         try {
             const res = await fetch('/api/access-grants/');
             if (res.ok) {
                 const grants = await res.json();
-                const received = grants.filter(g => g.grantee === currentUser.username);
-                requestList.innerHTML = '';
-
-                if (received.length === 0) {
-                    // Palette UX: Show a friendly empty state when no shared items are found.
-                    requestList.innerHTML = `
-                        <div class="text-center py-5 opacity-75">
-                            <div class="mb-3">
-                                <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">share_off</span>
-                            </div>
-                            <h6 class="text-muted">No shared secrets</h6>
-                            <p class="small text-muted">Items shared with you by others will appear here.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
-                // This reduces browser reflows from O(N) to O(1) per list load.
-                const fragment = document.createDocumentFragment();
-                received.forEach(g => {
-                    const card = document.createElement('div');
-                    card.className = 'request-card';
-                    card.innerHTML = `
-                        <div class="request-info">
-                            <div class="fw-medium">Shared by: ${g.granted_by}</div>
-                            <div class="text-muted small">Vault Item ID: ${g.vault_item}</div>
-                        </div>
-                        <div class="request-actions">
-                            <button class="btn btn-sm btn-outline-success" onclick="alert('Access already active. Check your vault.')">View</button>
-                        </div>
-                    `;
-                    fragment.appendChild(card);
-                });
-                requestList.appendChild(fragment);
+                cache.requests = grants.filter(g => g.grantee === currentUser.username);
+                renderRequests(cache.requests);
             }
         } catch (e) {
             console.error('Failed to load requests', e);
         }
+    }
+
+    function renderRequests(received) {
+        const requestList = document.getElementById('requestList');
+        requestList.innerHTML = '';
+
+        if (received.length === 0) {
+            // Palette UX: Show a friendly empty state when no shared items are found.
+            requestList.innerHTML = `
+                <div class="text-center py-5 opacity-75">
+                    <div class="mb-3">
+                        <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">share_off</span>
+                    </div>
+                    <h6 class="text-muted">No shared secrets</h6>
+                    <p class="small text-muted">Items shared with you by others will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+        // This reduces browser reflows from O(N) to O(1) per list load.
+        const fragment = document.createDocumentFragment();
+        received.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            card.innerHTML = `
+                <div class="request-info">
+                    <div class="fw-medium">Shared by: ${g.granted_by}</div>
+                    <div class="text-muted small">Vault Item ID: ${g.vault_item}</div>
+                </div>
+                <div class="request-actions">
+                    <button class="btn btn-sm btn-outline-success" onclick="alert('Access already active. Check your vault.')">View</button>
+                </div>
+            `;
+            fragment.appendChild(card);
+        });
+        requestList.appendChild(fragment);
     }
 
     // --- Audit Logs View ---
@@ -596,30 +634,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         const auditLogBody = document.getElementById('auditLogBody');
         if (!auditLogBody) return;
 
+        // Bolt Performance: Return cached data if available
+        if (cache.auditLogs) {
+            renderAuditLogs(cache.auditLogs);
+            return;
+        }
+
         try {
             const res = await fetch('/api/audit-events/');
             if (res.ok) {
-                const logs = await res.json();
-                auditLogBody.innerHTML = '';
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
-                // This reduces browser reflows from O(N) to O(1) per list load.
-                const fragment = document.createDocumentFragment();
-                logs.forEach(log => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(log.created_at).toLocaleString()}</td>
-                        <td>${log.actor}</td>
-                        <td><span class="badge bg-secondary">${log.action.toUpperCase()}</span></td>
-                        <td>${log.target_type}: ${log.target_id}</td>
-                        <td>${log.ip_address || '-'}</td>
-                    `;
-                    fragment.appendChild(row);
-                });
-                auditLogBody.appendChild(fragment);
+                cache.auditLogs = await res.json();
+                renderAuditLogs(cache.auditLogs);
             }
         } catch (e) {
             console.error('Failed to load audit logs', e);
         }
+    }
+
+    function renderAuditLogs(logs) {
+        const auditLogBody = document.getElementById('auditLogBody');
+        auditLogBody.innerHTML = '';
+        // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+        // This reduces browser reflows from O(N) to O(1) per list load.
+        const fragment = document.createDocumentFragment();
+        logs.forEach(log => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date(log.created_at).toLocaleString()}</td>
+                <td>${log.actor}</td>
+                <td><span class="badge bg-secondary">${log.action.toUpperCase()}</span></td>
+                <td>${log.target_type}: ${log.target_id}</td>
+                <td>${log.ip_address || '-'}</td>
+            `;
+            fragment.appendChild(row);
+        });
+        auditLogBody.appendChild(fragment);
     }
 
     // --- Detail Pane Access Logs ---
@@ -653,36 +702,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         const peopleList = document.getElementById('peopleList');
         if (!peopleList) return;
 
+        // Bolt Performance: Return cached data if available
+        if (cache.people) {
+            renderPeople(cache.people);
+            return;
+        }
+
         try {
             const res = await fetch('/api/users/');
             if (res.ok) {
-                const users = await res.json();
-                peopleList.innerHTML = '';
-                // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
-                // This reduces browser reflows from O(N) to O(1) per list load.
-                const fragment = document.createDocumentFragment();
-                users.forEach(u => {
-                    const col = document.createElement('div');
-                    col.className = 'col-md-4 mb-3';
-                    col.innerHTML = `
-                        <div class="card bg-dark border-secondary h-100">
-                            <div class="card-body">
-                                <h6 class="mb-1">${u.username}</h6>
-                                <div class="small text-muted mb-2">${u.email || 'No email'}</div>
-                                <span class="badge bg-secondary">${u.role}</span>
-                                <div class="mt-2 small text-muted">
-                                    ${u.organization || 'No Organization'} / ${u.department || 'No Dept'}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    fragment.appendChild(col);
-                });
-                peopleList.appendChild(fragment);
+                cache.people = await res.json();
+                renderPeople(cache.people);
             }
         } catch (e) {
             console.error('Failed to load people', e);
         }
+    }
+
+    function renderPeople(users) {
+        const peopleList = document.getElementById('peopleList');
+        peopleList.innerHTML = '';
+        // Bolt Optimization: Use DocumentFragment to batch DOM updates for list rendering.
+        // This reduces browser reflows from O(N) to O(1) per list load.
+        const fragment = document.createDocumentFragment();
+        users.forEach(u => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 mb-3';
+            col.innerHTML = `
+                <div class="card bg-dark border-secondary h-100">
+                    <div class="card-body">
+                        <h6 class="mb-1">${u.username}</h6>
+                        <div class="small text-muted mb-2">${u.email || 'No email'}</div>
+                        <span class="badge bg-secondary">${u.role}</span>
+                        <div class="mt-2 small text-muted">
+                            ${u.organization || 'No Organization'} / ${u.department || 'No Dept'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            fragment.appendChild(col);
+        });
+        peopleList.appendChild(fragment);
     }
 
     // --- Logout ---
@@ -696,5 +756,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.sidebar-footer').appendChild(logoutBtn);
 
     // --- Init ---
-    checkAuth();
+    checkAuth().then(() => {
+        // Palette UX: Auto-focus username if auth overlay is visible after check
+        if (!authOverlay.classList.contains('d-none')) {
+            authUsername.focus();
+        }
+    });
 });

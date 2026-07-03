@@ -17,3 +17,7 @@
 ## 2026-06-18 - Redundant Query Elimination and DRF BinaryField Optimization
 **Learning:** Redundant database queries occur when assigning model instances to foreign keys if the ID is already available (e.g., `user.organization_id`). Additionally, DRF `ModelSerializer` can handle Base64 for `BinaryField` automatically if `extra_kwargs` explicitly sets `read_only: False`.
 **Action:** Optimized `VaultItemSerializer.create` and `log_audit_event` to use `_id` fields. Pruned unnecessary `select_related` in viewsets. Removed manual Base64 logic in `VaultItemSerializer` by configuring `extra_kwargs`.
+
+## 2026-06-20 - Client-Side Tab Data Caching
+**Learning:** Redundant API calls when switching between application tabs (Shared, People, Audit) cause unnecessary network overhead and UI lag.
+**Action:** Implemented a client-side caching mechanism in `app.js` that stores API results and invalidates them only after relevant create/share actions.

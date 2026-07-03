@@ -17,3 +17,7 @@
 ## 2026-06-19 - Micro-UX feedback for async operations
 **Learning:** Providing immediate visual feedback (spinners and stateful button text) for long-running operations like authentication and decryption significantly improves perceived performance and user confidence.
 **Action:** Implemented loading states for login and decryption buttons and added a password visibility toggle.
+
+## 2026-06-20 - Auto-focus for Modals and Auth Forms
+**Learning:** Users expect the cursor to be ready in the first input field when a modal or authentication form appears. Manual clicking increases friction.
+**Action:** Implemented auto-focus using Bootstrap `shown.bs.modal` events for secret creation/sharing modals and focused the username field on auth form load and tab switch.
