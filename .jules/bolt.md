@@ -21,3 +21,7 @@
 ## 2026-06-20 - Client-Side Tab Data Caching
 **Learning:** Redundant API calls when switching between application tabs (Shared, People, Audit) cause unnecessary network overhead and UI lag.
 **Action:** Implemented a client-side caching mechanism in `app.js` that stores API results and invalidates them only after relevant create/share actions.
+
+## 2026-07-06 - Pre-calculation in Rendering Loops & Event Delegation
+**Learning:** Performing data transformations (like `toLowerCase()` or `toLocaleDateString()`) inside high-frequency rendering loops that fire on search/filter changes can cause noticeable UI lag as the dataset grows. Additionally, attaching individual event listeners to many DOM elements increases memory pressure.
+**Action:** Pre-calculate rendering-ready properties during the data-fetching phase and use event delegation on parent containers to manage child interactions efficiently.
