@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rotateAdminBtn = document.getElementById('rotateAdminBtn');
     const vaultControls = document.getElementById('vaultControls');
 
+    // Palette UX Improvement: Explicitly declare DOM elements at the top for reliable scoping
+    const copySecretBtn = document.getElementById('copySecretBtn');
+    const searchInput = document.getElementById('vault-search');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const saveSecretBtn = document.getElementById('saveSecretBtn');
+    const confirmShareBtn = document.getElementById('confirmShareBtn');
+
     // State
     let currentUser = null;
     let masterKey = null;
@@ -224,7 +231,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const res = await fetch('/api/vault-items/');
             if (res.ok) {
-                secrets = await res.json();
+                const data = await res.json();
+                // Bolt Performance Optimization: Pre-calculate properties to optimize the render loop.
+                secrets = data.map(item => ({
+                    ...item,
+                    _searchStr: item.title.toLowerCase(),
+                    _formattedDate: new Date(item.updated_at).toLocaleDateString()
+                }));
                 renderVault();
             }
         } catch (e) {
@@ -233,16 +246,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderVault() {
-        const query = searchInput.value.toLowerCase();
-        const activeFilter = document.querySelector('.filter-chip.active').textContent.toLowerCase();
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        const activeFilterChip = document.querySelector('.filter-chip.active');
+        const activeFilter = activeFilterChip ? activeFilterChip.textContent.toLowerCase() : 'all';
 
         // Clear existing content efficiently
         vaultGrid.innerHTML = '';
+
         const filtered = secrets.filter(item => {
-            const matchesSearch = item.title.toLowerCase().includes(query);
+            // Bolt Performance: Use pre-calculated lowercase title for search
+            const matchesSearch = item._searchStr.includes(query);
             const matchesFilter = activeFilter === 'all' || item.scope === activeFilter;
             return matchesSearch && matchesFilter;
         });
+
+        if (filtered.length === 0) {
+            // Palette UX Improvement: Show a user-friendly empty state when search/filter has no results.
+            const emptyState = document.createElement('div');
+            emptyState.className = 'text-center py-5 w-100 opacity-75';
+            emptyState.innerHTML = `
+                <div class="mb-3">
+                    <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">search_off</span>
+                </div>
+                <h6 class="text-muted">No secrets found</h6>
+                <p class="small text-muted">Try adjusting your search or filter settings.</p>
+            `;
+            vaultGrid.appendChild(emptyState);
+            document.getElementById('itemCount').textContent = '0 Secrets';
+            return;
+        }
 
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
@@ -254,7 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="card-header">
                         <div class="card-title-group">
                             <h3 class="h6 mb-0">${item.title}</h3>
-                            <div class="text-muted small">Updated ${new Date(item.updated_at).toLocaleDateString()}</div>
+                            <div class="text-muted small">Updated ${item._formattedDate}</div>
                         </div>
                     </div>
                     <div class="card-tags">
@@ -387,8 +419,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Decrypt & Show ---
-    const decryptBtn = document.getElementById('decryptBtn');
-
     if (decryptBtn) {
         decryptBtn.addEventListener('click', async () => {
             const itemId = detailPane.dataset.itemId;
@@ -456,7 +486,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Search & Filter ---
-    const searchInput = document.getElementById('vault-search');
     const filterChips = document.querySelectorAll('.filter-chip');
 
     // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
@@ -535,6 +564,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (shareSecretForm) {
         shareSecretForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Palette UX Improvement: Provide visual feedback during the async sharing operation
+            const spinner = confirmShareBtn.querySelector('.spinner-border');
+            const btnText = confirmShareBtn.querySelector('.btn-text');
+
+            confirmShareBtn.disabled = true;
+            if (spinner) spinner.classList.remove('d-none');
+            if (btnText) btnText.textContent = 'Sharing...';
+
             const itemId = detailPane.dataset.itemId;
             const recipient = document.getElementById('shareRecipient').value;
             const expiry = document.getElementById('shareExpiry').value;
@@ -564,6 +602,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error(err);
                 alert(err.message);
+            } finally {
+                confirmShareBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Share Access';
             }
         });
     }
