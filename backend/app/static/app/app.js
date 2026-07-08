@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closePaneBtn = document.getElementById('closePaneBtn');
     const rotateAdminBtn = document.getElementById('rotateAdminBtn');
     const vaultControls = document.getElementById('vaultControls');
+    const copySecretBtn = document.getElementById('copySecretBtn');
 
     // State
     let currentUser = null;
@@ -272,14 +273,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (filtered.length === 0) {
-            // Palette UX: Show a friendly empty state when no secrets are found.
+            // Palette UX: User-friendly empty state when no items match the current search or filters.
             vaultGrid.innerHTML = `
-                <div class="col-12 text-center py-5 opacity-75" style="grid-column: 1 / -1;">
+                <div class="col-12 text-center py-5 opacity-75">
                     <div class="mb-3">
-                        <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">inventory_2</span>
+                        <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">search_off</span>
                     </div>
                     <h5 class="text-muted">No secrets found</h5>
-                    <p class="small text-muted">Try adjusting your search or filters, or create a new secret.</p>
+                    <p class="small text-muted">Try adjusting your filters or search terms.</p>
                 </div>
             `;
             document.getElementById('itemCount').textContent = '0 Secrets';
@@ -292,11 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = 'vault-card';
-            card.dataset.id = item.id;
-            // Palette Accessibility: Add keyboard support and ARIA roles
-            card.tabIndex = 0;
-            card.role = 'button';
+            // Palette UX: Accessibility attributes for keyboard navigation and screen readers
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
             card.setAttribute('aria-label', `View details for ${item.title}`);
+
             card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title-group">
@@ -311,6 +312,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="password-mask">••••••••••••</div>
                     </div>
                 `;
+            card.addEventListener('click', () => showDetail(item));
+
+            // Palette UX: Keyboard event listeners (Enter and Space) to allow opening details via keyboard.
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showDetail(item);
+                }
+            });
+
             fragment.appendChild(card);
         });
         vaultGrid.appendChild(fragment);
