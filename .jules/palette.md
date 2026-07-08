@@ -21,3 +21,7 @@
 ## 2026-06-20 - Auto-focus for Modals and Auth Forms
 **Learning:** Users expect the cursor to be ready in the first input field when a modal or authentication form appears. Manual clicking increases friction.
 **Action:** Implemented auto-focus using Bootstrap `shown.bs.modal` events for secret creation/sharing modals and focused the username field on auth form load and tab switch.
+
+## 2026-06-21 - Vault Card Accessibility & Empty State UX
+**Learning:** Simple interactive divs without ARIA roles or keyboard support are inaccessible to screen reader and keyboard-only users. A blank screen when no items match search/filters is confusing.
+**Action:** Added 'button' role, tabindex, and aria-labels to vault cards. Implemented Enter/Space key listeners and a descriptive empty state for the vault view.

@@ -221,11 +221,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Vault Logic ---
 
+    // Bolt Performance: Single event listener for all vault cards (event delegation)
+    if (vaultGrid) {
+        vaultGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.vault-card');
+            if (card && card.dataset.id) {
+                const item = secrets.find(s => s.id == card.dataset.id);
+                if (item) showDetail(item);
+            }
+        });
+
+        // Palette Accessibility: Handle Enter and Space keys for keyboard navigation
+        vaultGrid.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = e.target.closest('.vault-card');
+                if (card && card.dataset.id) {
+                    e.preventDefault();
+                    const item = secrets.find(s => s.id == card.dataset.id);
+                    if (item) showDetail(item);
+                }
+            }
+        });
+    }
+
     async function loadVault() {
         try {
             const res = await fetch('/api/vault-items/');
             if (res.ok) {
                 secrets = await res.json();
+                // Bolt Performance: Pre-format dates to avoid redundant processing in render loop
+                secrets.forEach(item => {
+                    item.formattedDate = new Date(item.updated_at).toLocaleDateString();
+                });
                 renderVault();
             }
         } catch (e) {
@@ -275,7 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="card-header">
                         <div class="card-title-group">
                             <h3 class="h6 mb-0">${item.title}</h3>
-                            <div class="text-muted small">Updated ${new Date(item.updated_at).toLocaleDateString()}</div>
+                            <div class="text-muted small">Updated ${item.formattedDate}</div>
                         </div>
                     </div>
                     <div class="card-tags">
