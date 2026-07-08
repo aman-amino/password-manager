@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closePaneBtn = document.getElementById('closePaneBtn');
     const rotateAdminBtn = document.getElementById('rotateAdminBtn');
     const vaultControls = document.getElementById('vaultControls');
+    const searchInput = document.getElementById('vault-search');
+    const decryptBtn = document.getElementById('decryptBtn');
     const copySecretBtn = document.getElementById('copySecretBtn');
 
     // State
@@ -267,7 +269,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Clear existing content efficiently
         vaultGrid.innerHTML = '';
         const filtered = secrets.filter(item => {
-            const matchesSearch = item.title.toLowerCase().includes(query);
+            // Bolt Performance: Use pre-calculated search string
+            const matchesSearch = item._searchStr.includes(query);
             const matchesFilter = activeFilter === 'all' || item.scope === activeFilter;
             return matchesSearch && matchesFilter;
         });
@@ -327,6 +330,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         vaultGrid.appendChild(fragment);
         document.getElementById('itemCount').textContent = `${filtered.length} Secrets`;
     }
+
+    // Bolt Performance: Event delegation for vault card interactions
+    vaultGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.vault-card');
+        if (card) {
+            const itemId = card.dataset.itemId;
+            const item = secrets.find(s => s.id == itemId);
+            if (item) showDetail(item);
+        }
+    });
+
+    vaultGrid.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            const card = e.target.closest('.vault-card');
+            if (card) {
+                e.preventDefault();
+                const itemId = card.dataset.itemId;
+                const item = secrets.find(s => s.id == itemId);
+                if (item) showDetail(item);
+            }
+        }
+    });
 
     function showDetail(item) {
         document.getElementById('detailOwner').textContent = item.owner;
@@ -444,8 +469,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Decrypt & Show ---
-    const decryptBtn = document.getElementById('decryptBtn');
-
     if (decryptBtn) {
         decryptBtn.addEventListener('click', async () => {
             const itemId = detailPane.dataset.itemId;
@@ -513,9 +536,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Search & Filter ---
-    const searchInput = document.getElementById('vault-search');
-    const filterChips = document.querySelectorAll('.filter-chip');
-
     // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
     function debounce(func, wait) {
         let timeout;
@@ -531,6 +551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 250));
     }
 
+    const filterChips = document.querySelectorAll('.filter-chip');
     filterChips.forEach(chip => {
         chip.addEventListener('click', () => {
             filterChips.forEach(c => {
@@ -708,6 +729,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function getActionBadgeClass(action) {
+        const actionLower = action.toLowerCase();
+        if (actionLower === 'create') return 'bg-success';
+        if (actionLower === 'delete') return 'bg-danger';
+        if (actionLower === 'update') return 'bg-info';
+        if (actionLower === 'login') return 'bg-primary';
+        return 'bg-secondary';
+    }
+
     function renderAuditLogs(logs) {
         const auditLogBody = document.getElementById('auditLogBody');
         auditLogBody.innerHTML = '';
@@ -719,7 +749,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.innerHTML = `
                 <td>${new Date(log.created_at).toLocaleString()}</td>
                 <td>${log.actor}</td>
-                <td><span class="badge bg-secondary">${log.action.toUpperCase()}</span></td>
+                <td><span class="badge ${getActionBadgeClass(log.action)}">${log.action.toUpperCase()}</span></td>
                 <td>${log.target_type}: ${log.target_id}</td>
                 <td>${log.ip_address || '-'}</td>
             `;
@@ -743,8 +773,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fragment = document.createDocumentFragment();
                 logs.slice(0, 5).forEach(log => {
                     const li = document.createElement('li');
-                    li.className = 'small text-muted mb-1';
-                    li.textContent = `${new Date(log.created_at).toLocaleDateString()} - ${log.actor} (${log.action})`;
+                    li.className = 'small text-muted mb-1 d-flex align-items-center gap-2';
+                    li.innerHTML = `
+                        <span class="badge ${getActionBadgeClass(log.action)}" style="font-size: 8px;">${log.action.toUpperCase()}</span>
+                        <span>${new Date(log.created_at).toLocaleDateString()} - ${log.actor}</span>
+                    `;
                     fragment.appendChild(li);
                 });
                 detailAccessLogs.appendChild(fragment);
