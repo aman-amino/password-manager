@@ -27,6 +27,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const decryptBtn = document.getElementById('decryptBtn');
     const copySecretBtn = document.getElementById('copySecretBtn');
 
+    // Palette UX Improvement: Explicitly declare DOM elements at the top for reliable scoping
+    const copySecretBtn = document.getElementById('copySecretBtn');
+    const searchInput = document.getElementById('vault-search');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const saveSecretBtn = document.getElementById('saveSecretBtn');
+    const confirmShareBtn = document.getElementById('confirmShareBtn');
+
     // State
     let currentUser = null;
     let masterKey = null;
@@ -263,11 +270,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderVault() {
-        const query = searchInput.value.toLowerCase();
-        const activeFilter = document.querySelector('.filter-chip.active').textContent.toLowerCase();
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        const activeFilterChip = document.querySelector('.filter-chip.active');
+        const activeFilter = activeFilterChip ? activeFilterChip.textContent.toLowerCase() : 'all';
 
         // Clear existing content efficiently
         vaultGrid.innerHTML = '';
+
         const filtered = secrets.filter(item => {
             // Bolt Performance: Use pre-calculated search string
             const matchesSearch = item._searchStr.includes(query);
@@ -613,6 +622,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (shareSecretForm) {
         shareSecretForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Palette UX Improvement: Provide visual feedback during the async sharing operation
+            const spinner = confirmShareBtn.querySelector('.spinner-border');
+            const btnText = confirmShareBtn.querySelector('.btn-text');
+
+            confirmShareBtn.disabled = true;
+            if (spinner) spinner.classList.remove('d-none');
+            if (btnText) btnText.textContent = 'Sharing...';
+
             const itemId = detailPane.dataset.itemId;
             const recipient = document.getElementById('shareRecipient').value;
             const expiry = document.getElementById('shareExpiry').value;
@@ -642,6 +660,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error(err);
                 alert(err.message);
+            } finally {
+                confirmShareBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = 'Share Access';
             }
         });
     }
