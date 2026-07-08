@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closePaneBtn = document.getElementById('closePaneBtn');
     const rotateAdminBtn = document.getElementById('rotateAdminBtn');
     const vaultControls = document.getElementById('vaultControls');
+    const searchInput = document.getElementById('vault-search');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const copySecretBtn = document.getElementById('copySecretBtn');
 
     // Palette UX Improvement: Explicitly declare DOM elements at the top for reliable scoping
     const copySecretBtn = document.getElementById('copySecretBtn');
@@ -227,17 +230,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Vault Logic ---
 
+    // Bolt Performance: Single event listener for all vault cards (event delegation)
+    if (vaultGrid) {
+        vaultGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.vault-card');
+            if (card && card.dataset.id) {
+                const item = secrets.find(s => s.id == card.dataset.id);
+                if (item) showDetail(item);
+            }
+        });
+
+        // Palette Accessibility: Handle Enter and Space keys for keyboard navigation
+        vaultGrid.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = e.target.closest('.vault-card');
+                if (card && card.dataset.id) {
+                    e.preventDefault();
+                    const item = secrets.find(s => s.id == card.dataset.id);
+                    if (item) showDetail(item);
+                }
+            }
+        });
+    }
+
     async function loadVault() {
         try {
             const res = await fetch('/api/vault-items/');
             if (res.ok) {
-                const data = await res.json();
-                // Bolt Performance Optimization: Pre-calculate properties to optimize the render loop.
-                secrets = data.map(item => ({
-                    ...item,
-                    _searchStr: item.title.toLowerCase(),
-                    _formattedDate: new Date(item.updated_at).toLocaleDateString()
-                }));
+                secrets = await res.json();
+                // Bolt Performance: Pre-format dates to avoid redundant processing in render loop
+                secrets.forEach(item => {
+                    item.formattedDate = new Date(item.updated_at).toLocaleDateString();
+                });
                 renderVault();
             }
         } catch (e) {
@@ -254,24 +278,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         vaultGrid.innerHTML = '';
 
         const filtered = secrets.filter(item => {
-            // Bolt Performance: Use pre-calculated lowercase title for search
+            // Bolt Performance: Use pre-calculated search string
             const matchesSearch = item._searchStr.includes(query);
             const matchesFilter = activeFilter === 'all' || item.scope === activeFilter;
             return matchesSearch && matchesFilter;
         });
 
         if (filtered.length === 0) {
-            // Palette UX Improvement: Show a user-friendly empty state when search/filter has no results.
-            const emptyState = document.createElement('div');
-            emptyState.className = 'text-center py-5 w-100 opacity-75';
-            emptyState.innerHTML = `
-                <div class="mb-3">
-                    <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">search_off</span>
+            // Palette UX: User-friendly empty state when no items match the current search or filters.
+            vaultGrid.innerHTML = `
+                <div class="col-12 text-center py-5 opacity-75">
+                    <div class="mb-3">
+                        <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">search_off</span>
+                    </div>
+                    <h5 class="text-muted">No secrets found</h5>
+                    <p class="small text-muted">Try adjusting your filters or search terms.</p>
                 </div>
-                <h6 class="text-muted">No secrets found</h6>
-                <p class="small text-muted">Try adjusting your search or filter settings.</p>
             `;
-            vaultGrid.appendChild(emptyState);
             document.getElementById('itemCount').textContent = '0 Secrets';
             return;
         }
@@ -282,11 +305,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = 'vault-card';
+            // Palette UX: Accessibility attributes for keyboard navigation and screen readers
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('aria-label', `View details for ${item.title}`);
+
             card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title-group">
                             <h3 class="h6 mb-0">${item.title}</h3>
-                            <div class="text-muted small">Updated ${item._formattedDate}</div>
+                            <div class="text-muted small">Updated ${item.formattedDate}</div>
                         </div>
                     </div>
                     <div class="card-tags">
@@ -297,11 +325,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 `;
             card.addEventListener('click', () => showDetail(item));
+
+            // Palette UX: Keyboard event listeners (Enter and Space) to allow opening details via keyboard.
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showDetail(item);
+                }
+            });
+
             fragment.appendChild(card);
         });
         vaultGrid.appendChild(fragment);
         document.getElementById('itemCount').textContent = `${filtered.length} Secrets`;
     }
+
+    // Bolt Performance: Event delegation for vault card interactions
+    vaultGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.vault-card');
+        if (card) {
+            const itemId = card.dataset.itemId;
+            const item = secrets.find(s => s.id == itemId);
+            if (item) showDetail(item);
+        }
+    });
+
+    vaultGrid.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            const card = e.target.closest('.vault-card');
+            if (card) {
+                e.preventDefault();
+                const itemId = card.dataset.itemId;
+                const item = secrets.find(s => s.id == itemId);
+                if (item) showDetail(item);
+            }
+        }
+    });
 
     function showDetail(item) {
         document.getElementById('detailOwner').textContent = item.owner;
@@ -486,8 +545,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Search & Filter ---
-    const filterChips = document.querySelectorAll('.filter-chip');
-
     // Palette UX Improvement: Debounce search input to avoid excessive DOM re-renders while typing.
     function debounce(func, wait) {
         let timeout;
@@ -503,6 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 250));
     }
 
+    const filterChips = document.querySelectorAll('.filter-chip');
     filterChips.forEach(chip => {
         chip.addEventListener('click', () => {
             filterChips.forEach(c => {
@@ -693,6 +751,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function getActionBadgeClass(action) {
+        const actionLower = action.toLowerCase();
+        if (actionLower === 'create') return 'bg-success';
+        if (actionLower === 'delete') return 'bg-danger';
+        if (actionLower === 'update') return 'bg-info';
+        if (actionLower === 'login') return 'bg-primary';
+        return 'bg-secondary';
+    }
+
     function renderAuditLogs(logs) {
         const auditLogBody = document.getElementById('auditLogBody');
         auditLogBody.innerHTML = '';
@@ -704,7 +771,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.innerHTML = `
                 <td>${new Date(log.created_at).toLocaleString()}</td>
                 <td>${log.actor}</td>
-                <td><span class="badge bg-secondary">${log.action.toUpperCase()}</span></td>
+                <td><span class="badge ${getActionBadgeClass(log.action)}">${log.action.toUpperCase()}</span></td>
                 <td>${log.target_type}: ${log.target_id}</td>
                 <td>${log.ip_address || '-'}</td>
             `;
@@ -728,8 +795,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fragment = document.createDocumentFragment();
                 logs.slice(0, 5).forEach(log => {
                     const li = document.createElement('li');
-                    li.className = 'small text-muted mb-1';
-                    li.textContent = `${new Date(log.created_at).toLocaleDateString()} - ${log.actor} (${log.action})`;
+                    li.className = 'small text-muted mb-1 d-flex align-items-center gap-2';
+                    li.innerHTML = `
+                        <span class="badge ${getActionBadgeClass(log.action)}" style="font-size: 8px;">${log.action.toUpperCase()}</span>
+                        <span>${new Date(log.created_at).toLocaleDateString()} - ${log.actor}</span>
+                    `;
                     fragment.appendChild(li);
                 });
                 detailAccessLogs.appendChild(fragment);
