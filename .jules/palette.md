@@ -22,6 +22,6 @@
 **Learning:** Users expect the cursor to be ready in the first input field when a modal or authentication form appears. Manual clicking increases friction.
 **Action:** Implemented auto-focus using Bootstrap `shown.bs.modal` events for secret creation/sharing modals and focused the username field on auth form load and tab switch.
 
-## 2026-07-06 - Color-Coded Audit Logs & Keyboard Navigation for Lists
-**Learning:** Lists of technical events (like audit logs) are difficult to scan when all actions have the same visual weight. Semantic color-coding helps users quickly identify critical actions (e.g., deletions). Furthermore, custom-rendered list items must have proper ARIA roles and keyboard listeners to be truly accessible.
-**Action:** Implement a helper to map actions to semantic CSS classes (e.g., `bg-success` for CREATE) and ensure all list-based navigation supports 'Enter'/'Space' keys.
+## 2026-06-21 - Vault Card Accessibility & Empty State UX
+**Learning:** Simple interactive divs without ARIA roles or keyboard support are inaccessible to screen reader and keyboard-only users. A blank screen when no items match search/filters is confusing.
+**Action:** Added 'button' role, tabindex, and aria-labels to vault cards. Implemented Enter/Space key listeners and a descriptive empty state for the vault view.

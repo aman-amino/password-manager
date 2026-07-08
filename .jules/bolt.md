@@ -22,6 +22,6 @@
 **Learning:** Redundant API calls when switching between application tabs (Shared, People, Audit) cause unnecessary network overhead and UI lag.
 **Action:** Implemented a client-side caching mechanism in `app.js` that stores API results and invalidates them only after relevant create/share actions.
 
-## 2026-07-06 - Pre-calculation in Rendering Loops & Event Delegation
-**Learning:** Performing data transformations (like `toLowerCase()` or `toLocaleDateString()`) inside high-frequency rendering loops that fire on search/filter changes can cause noticeable UI lag as the dataset grows. Additionally, attaching individual event listeners to many DOM elements increases memory pressure.
-**Action:** Pre-calculate rendering-ready properties during the data-fetching phase and use event delegation on parent containers to manage child interactions efficiently.
+## 2026-06-21 - Vault Rendering Optimization (Event Delegation & Date Caching)
+**Learning:** Attaching multiple event listeners to large lists (vault cards) increases memory overhead and slows down DOM updates. Additionally, re-calculating date strings during every render/filter cycle is redundant.
+**Action:** Implemented event delegation on the vault grid and cached formatted date strings on the secret objects during the initial fetch.

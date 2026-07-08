@@ -223,17 +223,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Vault Logic ---
 
+    // Bolt Performance: Single event listener for all vault cards (event delegation)
+    if (vaultGrid) {
+        vaultGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.vault-card');
+            if (card && card.dataset.id) {
+                const item = secrets.find(s => s.id == card.dataset.id);
+                if (item) showDetail(item);
+            }
+        });
+
+        // Palette Accessibility: Handle Enter and Space keys for keyboard navigation
+        vaultGrid.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = e.target.closest('.vault-card');
+                if (card && card.dataset.id) {
+                    e.preventDefault();
+                    const item = secrets.find(s => s.id == card.dataset.id);
+                    if (item) showDetail(item);
+                }
+            }
+        });
+    }
+
     async function loadVault() {
         try {
             const res = await fetch('/api/vault-items/');
             if (res.ok) {
-                const rawSecrets = await res.json();
-                // Bolt Performance: Pre-calculate values for the high-frequency render loop
-                secrets = rawSecrets.map(item => ({
-                    ...item,
-                    _searchStr: item.title.toLowerCase(),
-                    _formattedDate: new Date(item.updated_at).toLocaleDateString()
-                }));
+                secrets = await res.json();
+                // Bolt Performance: Pre-format dates to avoid redundant processing in render loop
+                secrets.forEach(item => {
+                    item.formattedDate = new Date(item.updated_at).toLocaleDateString();
+                });
                 renderVault();
             }
         } catch (e) {
@@ -254,23 +275,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             return matchesSearch && matchesFilter;
         });
 
+        if (filtered.length === 0) {
+            // Palette UX: User-friendly empty state when no items match the current search or filters.
+            vaultGrid.innerHTML = `
+                <div class="col-12 text-center py-5 opacity-75">
+                    <div class="mb-3">
+                        <span class="material-icons" style="font-size: 48px; color: var(--text-muted);">search_off</span>
+                    </div>
+                    <h5 class="text-muted">No secrets found</h5>
+                    <p class="small text-muted">Try adjusting your filters or search terms.</p>
+                </div>
+            `;
+            document.getElementById('itemCount').textContent = '0 Secrets';
+            return;
+        }
+
         // Optimization: Use DocumentFragment to batch DOM updates and reduce reflows
         const fragment = document.createDocumentFragment();
 
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = 'vault-card';
-            // Palette UX: Add accessibility attributes
+            // Palette UX: Accessibility attributes for keyboard navigation and screen readers
             card.setAttribute('role', 'button');
             card.setAttribute('tabindex', '0');
             card.setAttribute('aria-label', `View details for ${item.title}`);
-            card.dataset.itemId = item.id; // Store ID for delegation
 
             card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title-group">
                             <h3 class="h6 mb-0">${item.title}</h3>
-                            <div class="text-muted small">Updated ${item._formattedDate}</div>
+                            <div class="text-muted small">Updated ${item.formattedDate}</div>
                         </div>
                     </div>
                     <div class="card-tags">
@@ -280,6 +315,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="password-mask">••••••••••••</div>
                     </div>
                 `;
+            card.addEventListener('click', () => showDetail(item));
+
+            // Palette UX: Keyboard event listeners (Enter and Space) to allow opening details via keyboard.
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showDetail(item);
+                }
+            });
+
             fragment.appendChild(card);
         });
         vaultGrid.appendChild(fragment);
